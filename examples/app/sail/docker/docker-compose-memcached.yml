@@ -1,0 +1,10 @@
+services:
+
+    memcached:
+        image: 'memcached:alpine'
+        container_name: ${SAIL_SERVICE_MEMCACHED}
+        ports:
+            - '${MEMCACHED_FORWARD_PORT}:11211'
+        networks:
+            - sail-project-net
+            - sail-net

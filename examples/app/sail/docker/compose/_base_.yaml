@@ -1,0 +1,4 @@
+networks:
+  sail:
+    driver: bridge
+    name: ${COMPOSE_PROJECT_NAME}

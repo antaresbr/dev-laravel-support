@@ -1,0 +1,252 @@
+#!/bin/bash
+
+echo ""
+echo "---[ $(dirname "$(realpath "${SCRIPT_DIR}")") ]---"
+echo "---| post-clone/$(basename "${BASH_SOURCE[0]}")"
+
+[ -z "${WORKSPACE_BASE_LIB_SH}" ] && echo -e "post-clone/setup-local | ERROR | WORKSPACE_BASE_LIB_SH not defined" && exit 1
+[ -z "${POST_CLONE_SETUP_LIB_SH}" ] && wsError "post-clone/setup-local" "POST_CLONE_SETUP_LIB_SH not defined"
+[ -z "${POST_CLONE_LIB_SH}" ] && wsError "post-clone/setup-local" "POST_CLONE_LIB_SH not defined"
+
+#---[ setup-local ]---
+
+#-- parameters
+
+pclLoadSavedParams
+
+if [ -z "${pAppName}" ]
+then
+  echo ""
+  envVarRead "APP name" "pAppName" "default:$(basename "$(dirname "$(realpath "${BASE_DIR}")")")|required|lower-case" ""
+fi
+
+echo ""
+[ -n "${pAppEnvDir}" ]      || envVarRead "env/${pEnvironment}-env : APP_ENV_DIR" "pAppEnvDir" "" ""
+[ -n "${pUrlProto}" ]       || envVarRead "env/${pEnvironment}-env : URL_PROTO" "pUrlProto" "default:http|required|lower-case|hide-values" "http|https"
+[ -n "${pUrlDomain}" ]      || envVarRead "env/${pEnvironment}-env : URL_DOMAIN" "pUrlDomain" "default:${pAppName}.${pEnvironment}|required|lower-case" ""
+[ -n "${pDbRootUsername}" ] || envVarRead "env/${pEnvironment}-env : DB_ROOT_USERNAME" "pDbRootUsername" "default:{{DB_USERNAME}}|required" ""
+[ -n "${pDbRootPassword}" ] || envVarRead "env/${pEnvironment}-env : DB_ROOT_PASSWORD" "pDbRootPassword" "default:{{DB_PASSWORD}}|required" ""
+
+[ "${pAppEnvDir}" = ":none:" ] && pAppEnvDir=""
+
+[ -z "${PC_IGNORE_CREATE_LINKS_TO_BASE_SCRIPTS}" ] || pLinksToBaseBaseScripts=no
+if [ -z "${pLinksToBaseBaseScripts}" ]
+then
+  echo""
+  envVarRead "Create links to base scripts?" "pLinksToBaseBaseScripts" "default:yes|lower-case|hide-values" "y|yes|n|no"
+fi
+
+[ -z "${PC_IGNORE_GIT_REPO_EXAMPLE}" ] || pCopyGitRepoExample=no
+if [ -z "${pCopyGitRepoExample}" ]
+then
+  echo""
+  envVarRead "Copy <git-repo> example to parent project?" "pCopyGitRepoExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+fi
+
+[ -z "${PC_IGNORE_POST_CLONE_EXAMPLE}" ] || pCopyPostCloneExample=no
+if [ -z "${pCopyPostCloneExample}" ]
+then
+  echo""
+  envVarRead "Copy <post-clone> example to parent project?" "pCopyPostCloneExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+fi
+
+[ -z "${PC_IGNORE_DOCKER_EXAMPLE}" ] || pCopyDockerExample=no
+if [ -z "${pCopyDockerExample}" ]
+then
+  echo""
+  envVarRead "Copy <docker> example to parent project?" "pCopyDockerExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+fi
+
+[ -z "${PC_IGNORE_SAIL_EXAMPLE}" ] || pCopySailExample=no
+if [ -z "${pCopySailExample}" ]
+then
+  echo""
+  envVarRead "Copy <sail> example to parent project?" "pCopySailExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+fi
+
+echo ""
+echo "---[ parameters ]---"
+echo ""
+echo "ENVIRONMENT : ${pEnvironment}"
+echo ""
+echo "pAppName    : ${pAppName}"
+echo ""
+echo "APP_ENV_DIR      : ${pAppEnvDir}"
+echo "URL_PROTO        : ${pUrlProto}"
+echo "URL_DOMAIN       : ${pUrlDomain}"
+echo "DB_ROOT_USERNAME : ${pDbRootUsername}"
+echo "DB_ROOT_PASSWORD : ${pDbRootPassword}"
+echo ""
+echo "pLinksToBaseBaseScripts : ${pLinksToBaseBaseScripts}"
+echo "pCopyGitRepoExample     : ${pCopyGitRepoExample}"
+echo "pCopyPostCloneExample   : ${pCopyPostCloneExample}"
+echo "pCopyDockerExample      : ${pCopyDockerExample}"
+echo "pCopySailExample        : ${pCopySailExample}"
+echo ""
+
+[ -n "${pConfirm}" ] || envVarRead "Confirm parameters?" "pConfirm" "default:yes|lower-case|hide-values" "y|yes|n|no"
+[ "${pConfirm:0:1}" == "y" ] || exit 0
+
+if [ ! -f "${SCRIPT_DIR}/setup.local.env" ]
+then
+  echo""
+  envVarRead "Save post-clone params?" "pSavePostcloneParams" "default:yes|lower-case|hide-values" "y|yes|n|no"
+  if [ "${pConfirm:0:1}" == "y" ]
+  then
+    echo "\
+#!/bin/bash
+pAppName=\"${pAppName}\"
+pAppEnvDir=\"${pAppEnvDir:-:none:}\"
+pUrlProto=\"${pUrlProto}\"
+pUrlDomain=\"${pUrlDomain}\"
+pDbRootUsername=\"${pDbRootUsername}\"
+pDbRootPassword=\"${pDbRootPassword}\"
+pLinksToBaseBaseScripts=\"${pLinksToBaseBaseScripts}\"
+pCopyGitRepoExample=\"${pCopyGitRepoExample}\"
+pCopyPostCloneExample=\"${pCopyPostCloneExample}\"
+pCopyDockerExample=\"${pCopyDockerExample}\"
+pCopySailExample=\"${pCopySailExample}\"
+" > "${SCRIPT_DIR}/setup.local.env"
+  fi
+fi
+
+#-- actions
+
+function doEnvFiles() {
+  wsCertifyPath "$(realpath "${BASE_DIR}/env")"
+
+  echo "env/${pEnvironment}-env"
+  wsTemplateFile "${BASE_DIR}/env/${pEnvironment}-env" "${BASE_DIR}/base/examples/support/env/env-example" "\
+APP_ENV_DIR=${pAppEnvDir}
+URL_PROTO=${pUrlProto}
+URL_DOMAIN=${pUrlDomain}
+DB_ROOT_USERNAME=${pDbRootUsername}
+DB_ROOT_PASSWORD=${pDbRootPassword}
+"
+  echo "env/mysql-${pEnvironment}-env"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/support/env/mysql-env-example" "${BASE_DIR}/env/mysql-${pEnvironment}-env"
+}
+
+
+function doLinksToBaseBaseScripts() {
+  local target=""
+  target="base/scripts/db-dump.sh"            && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/db-exec-sql.sh"        && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/db-init-dbdefault.sh"  && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/db-init.sh"            && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/db-migrate.sh"         && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/db-reset-passwords.sh" && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/db-restore.sh"         && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/db-seed.sh"            && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/init-app-env.sh"       && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/storage-build.sh"      && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+}
+
+
+function doCopyJsonExample() {
+  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/app/BUILD-INFO.json.example" "${BASE_DIR}/.." "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/app/ENVIRONMENT.json.example" "${BASE_DIR}/../" "644"
+}
+
+
+function doCopyPostCloneExample() {
+  wsCertifyPath "$(realpath "${BASE_DIR}/../post-clone")"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/app/post-clone/setup.local.sh.example" "${BASE_DIR}/../post-clone/setup.local.sh" "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/post-clone/.gitignore" "${BASE_DIR}/../post-clone/.gitignore" "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/post-clone/setup.sh" "${BASE_DIR}/../post-clone/setup.sh" "755"
+}
+
+
+function doCopyGitRepoExample() {
+  wsCertifyPath "$(realpath "${BASE_DIR}/../.git-repo")"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/app/git-repo/git-repo.env.sh.example" "${BASE_DIR}/../.git-repo/git-repo.env.sh" "644"
+}
+
+
+function doCopyDockerExample() {
+  local target="$(realpath "${BASE_DIR}/../docker")"
+  if [ -d "${target}" ]
+  then
+    echo "  + already exists"
+    return
+  fi
+  wsCertifyPath "${target}"
+  cp -vr "${BASE_DIR}/base/examples/app/docker" "${BASE_DIR}/../"
+}
+
+
+function doCopySailExample() {
+  local target="$(realpath "${BASE_DIR}/../sail")"
+  if [ -d "${target}" ]
+  then
+    echo "  + already exists"
+    return
+  fi
+  wsCertifyPath "${target}"
+  cp -vr "${BASE_DIR}/base/examples/app/sail" "${BASE_DIR}/../"
+}
+
+#-- template and examples
+
+echo ""
+echo "---[ env files ]---"
+doEnvFiles
+
+echo ""
+echo "---[ links to base scripts ]---"
+if [ "${pConfirm:0:1}" != "y" ]
+then
+  echo "  + skiped"
+else
+  doLinksToBaseBaseScripts
+fi
+
+echo ""
+echo "---[ example to parent : json ]---"
+if [ -n "${PC_IGNORE_POST_CLONE_EXAMPLE}" ]
+then
+  echo "  ! ignored"
+else
+  [ "${pCopyPostCloneExample:0:1}" == "y" ] && doCopyJsonExample
+  [ "${pCopyPostCloneExample:0:1}" == "y" ] || echo "  ! skiped"
+fi
+
+echo ""
+echo "---[ example to parent : post-clone ]---"
+if [ -n "${PC_IGNORE_POST_CLONE_EXAMPLE}" ]
+then
+  echo "  ! ignored"
+else
+  [ "${pCopyPostCloneExample:0:1}" == "y" ] && doCopyPostCloneExample
+  [ "${pCopyPostCloneExample:0:1}" == "y" ] || echo "  ! skiped"
+fi
+
+echo ""
+echo "---[ example to parent : git-repo ]---"
+if [ -n "${PC_IGNORE_GIT_REPO_EXAMPLE}" ]
+then
+  echo "  ! ignored"
+else
+  [ "${pCopyGitRepoExample:0:1}" == "y" ] && doCopyGitRepoExample
+  [ "${pCopyGitRepoExample:0:1}" == "y" ] || echo "  ! skiped"
+fi
+
+echo ""
+echo "---[ example to parent : docker ]---"
+if [ -n "${PC_IGNORE_DOCKER_EXAMPLE}" ]
+then
+  echo "  ! ignored"
+else
+  [ "${pCopyDockerExample:0:1}" == "y" ] && doCopyDockerExample
+  [ "${pCopyDockerExample:0:1}" == "y" ] || echo "  ! skiped"
+fi
+
+echo ""
+echo "---[ example to parent : sail ]---"
+if [ -n "${PC_IGNORE_SAIL_EXAMPLE}" ]
+then
+  echo "  ! ignored"
+else
+  [ "${pCopySailExample:0:1}" == "y" ] && doCopySailExample
+  [ "${pCopySailExample:0:1}" == "y" ] || echo "  ! skiped"
+fi

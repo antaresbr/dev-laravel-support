@@ -1,0 +1,21 @@
+services:
+
+    redis:
+        image: 'redis:alpine'
+        container_name: ${SAIL_SERVICE_REDIS}
+        ports:
+            - '${REDIS_FORWARD_PORT}:6379'
+        volumes:
+            - 'sail-redis-vol:/data'
+        networks:
+            - sail-project-net
+            - sail-net
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
+
+volumes:
+    sail-redis-vol:
+        driver: local
+        name: ${COMPOSE_PROJECT_NAME}-redis-vol

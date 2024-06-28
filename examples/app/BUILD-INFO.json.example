@@ -1,0 +1,10 @@
+{
+  "BUILD": "build",
+  "BUILD_ID": "build-id",
+  "BUILD_ENVIRONMENT": "build-environment",
+  "IMAGE_NAME": "image-name",
+  "GIT_BRANCH_NAME": "git-branch-name",
+  "GIT_BRANCH_REF": "git-branch-ref",
+  "GIT_HASH": "git-hash",
+  "TIMESTAMP": "timestamp"
+}

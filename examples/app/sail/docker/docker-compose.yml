@@ -1,0 +1,42 @@
+services:
+
+    app:
+        build:
+            context: ./app
+            dockerfile: Dockerfile
+            args:
+                UBUNTU_CODENAME: ${UBUNTU_CODENAME}
+                PHP_VERSION: ${PHP_VERSION}
+                NODE_VERSION: ${NODE_VERSION}
+                WWWUSER: '${WWWUSER}'
+                WWWGROUP: '${WWWGROUP}'
+        image: ${COMPOSE_PROJECT_NAME}/app
+        container_name: ${SAIL_SERVICE_APP}
+        extra_hosts:
+            - host.docker.internal:host-gateway
+            - gateway.docker.internal:host-gateway
+        ports:
+            - ${APP_PORT}:80
+        environment:
+            SAIL_ENV: ${SAIL_ENV}
+            SERVER_ENVIRONMENT: ${SERVER_ENVIRONMENT}
+            SERVER_MODE: app
+            SERVER_LABEL: ${SAIL_PROJECT}-${SAIL_SUBPROJECT}/app
+            WWWUSER: ${WWWUSER}
+            WWWGROUP: ${WWWGROUP}
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+        volumes:
+            - ../../:/var/www/html
+        networks:
+            - sail-project-net
+            - sail-net
+
+networks:
+    sail-project-net:
+        driver: bridge
+        name: ${COMPOSE_PROJECT_NAME}
+
+    sail-net:
+        external: true
