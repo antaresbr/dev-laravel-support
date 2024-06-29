@@ -108,14 +108,27 @@ function mysql_init_user() {
 }
 
 
-function mysql_dump() {
+function mysql_dump_to_file() {
   local dumpParams="${pDumpParams}"
   [ -n "${dumpParams}" ] || dumpParams="${MYSQL_DUMP_PARAMS}"
 
+  # mysqldump $(mysql_params) ${dumpParams} \
+  #   --no-tablespaces --no-create-db ${SUPP_DB_DATABASE} $@ \
+  #   | sed "s/\`${SUPP_DB_USERNAME}\`/\`{{@DB_USER@}}\`/g" \
+  #   | sed "s/\`dbadmin\`/\`{{@DB_USER@}}\`/g" \
+  #   > "${pFile}"
+
   mysqldump $(mysql_params) ${dumpParams} \
-    --no-tablespaces --no-create-db ${SUPP_DB_DATABASE} $@ \
-    | sed "s/\`${SUPP_DB_USERNAME}\`/\`{{@DB_USER@}}\`/g" \
-    | sed "s/\`dbadmin\`/\`{{@DB_USER@}}\`/g"
+   --no-tablespaces --no-create-db ${SUPP_DB_DATABASE} $@ \
+   > "${pFile}"
+  local _ec=$?; [ $_ec -eq 0 ] || return $_ec
+
+  sed -i "s/\`${SUPP_DB_USERNAME}\`/\`{{@DB_USER@}}\`/g" "${pFile}"
+  _ec=$?; [ $_ec -eq 0 ] || return $_ec
+
+  sed -i "s/\`dbadmin\`/\`{{@DB_USER@}}\`/g" "${pFile}"
+  _ec=$?; [ $_ec -eq 0 ] || return $_ec
+  
 }
 
 fi

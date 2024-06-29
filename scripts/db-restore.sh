@@ -24,19 +24,18 @@ msgHelp="
 Use: $(basename $0) <options>
 
 options:
-   --env <env>               Env file/ID
-   --affix                   Affix to be included in database vars;
-                             e.g.: If --affix audit is specified, the variables DB_AUDIT_* will be used instead of DB_*
-   --file <file>             Dump file to be created in APP_DIR/storage/dump;
-                             If ommited: <DB_DATABASE>_<YYYY>-<MM>-<DD>_<HH>h<MM>.dbbak
-   --no-header-infos         Flag to not show environment variables
-   --help                    Show this help
+   --env <env>        Env file/ID
+   --affix <affix>    Affix to be included in database vars;
+                      e.g.: If --affix audit is specified, the variables DB_AUDIT_* will be used instead of DB_*
+   --file <file>      Dump file to be restored
+   --no-header-infos  Flag to not show environment variables
+   --help             Show this help
 "
 #-- get parameters
 while [ $# -gt 0 ]
 do
   case "$1" in
-    "--env" | '--affix' | "--file" )
+    "--env" | "--affix" | "--file" )
       zp="$1"
       shift 1
       [ $# -lt 1 ] && wsError "Parameter: ${zp}, value not supplied"

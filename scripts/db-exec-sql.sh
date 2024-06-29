@@ -25,7 +25,7 @@ Use: $(basename $0) <options>
 
 options:
    --env <env>        Env file/ID
-   --affix            Affix to be included in database vars;
+   --affix <affix>    Affix to be included in database vars;
                       e.g.: If --affix audit is specified, the variables DB_AUDIT_* will be used instead of DB_*
    --file <file>      SQL file to be executed; Can be specified multiple times
    --no-header-infos  Flag to not show environment variables

@@ -26,10 +26,10 @@ Use: $(basename $0) <options>
 
 options:
    --env <env>               Env file/ID
-   --affix                   Affix to be included in database vars;
+   --affix <affix>           Affix to be included in database vars;
                              e.g.: If --affix audit is specified, the variables DB_AUDIT_* will be used instead of DB_*
    --file <file>             Dump file to be created in APP_DIR/storage/dump;
-                             If ommited: <DB_DATABASE>_<YYYY>-<MM>-<DD>_<HH>h<MM>.dbbak
+                             If ommited: <DB_DATABASE>_<YYYY>-<MM>-<DD>_<HH>h<MM>_<DB_DRIVER>.backup
    --dump-params '<params>'  Driver dump params
    --no-header-infos         Flag to not show environment variables
    --help                    Show this help
@@ -38,7 +38,7 @@ options:
 while [ $# -gt 0 ]
 do
   case "$1" in
-    "--env" | '--affix' | "--file" | "--dump-params" )
+    "--env" | "--affix" | "--file" | "--dump-params" )
       zp="$1"
       shift 1
       [ $# -lt 1 ] && wsError "Parameter: ${zp}, value not supplied"
@@ -80,7 +80,7 @@ if [ -z "${pFile}" ]
 then
   dumpDir="${APP_DIR}/storage/dump"
   [ -d "${dumpDir}" ] || mkdir "${dumpDir}"
-  pFile="${dumpDir}/${SUPP_DB_DATABASE}_$(date '+%Y-%m-%d_%Hh%M').dbbak"
+  pFile="${dumpDir}/${SUPP_DB_DATABASE}_$(date '+%Y-%m-%d_%Hh%M')_${SUPP_DB_DRIVER}.backup"
 fi
 
 wsLog "creating '${pFile}' ..."
@@ -88,7 +88,7 @@ wsLog "creating '${pFile}' ..."
 ${SUPP_DB_DRIVER}_user_credentials
 [ $? -eq 0 ] || supError "Fail to set user credentials"
 
-${SUPP_DB_DRIVER}_dump "$@" > "${pFile}"
+${SUPP_DB_DRIVER}_dump_to_file "$@"
 [ $? -eq 0 ] || supError "Fail to dump"
 
 wsLog "done."

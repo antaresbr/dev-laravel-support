@@ -116,7 +116,7 @@ function doEnvFiles() {
   wsCertifyPath "$(realpath "${BASE_DIR}/env")"
 
   echo "env/${pEnvironment}-env"
-  wsTemplateFile "${BASE_DIR}/env/${pEnvironment}-env" "${BASE_DIR}/base/examples/support/env/env-example" "\
+  wsTemplateFile "${BASE_DIR}/env/${pEnvironment}-env" "${BASE_DIR}/base/.example/support/env/env-example" "\
 APP_ENV_DIR=${pAppEnvDir}
 URL_PROTO=${pUrlProto}
 URL_DOMAIN=${pUrlDomain}
@@ -124,7 +124,8 @@ DB_ROOT_USERNAME=${pDbRootUsername}
 DB_ROOT_PASSWORD=${pDbRootPassword}
 "
   echo "env/mysql-${pEnvironment}-env"
-  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/support/env/mysql-env-example" "${BASE_DIR}/env/mysql-${pEnvironment}-env"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/.example/support/env/mysql-env-example" "${BASE_DIR}/env/mysql-${pEnvironment}-env"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/.example/support/env/.gitignore.example" "${BASE_DIR}/env/.gitignore"
 }
 
 
@@ -138,20 +139,21 @@ function doLinksToBaseBaseScripts() {
   target="base/scripts/db-reset-passwords.sh" && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
   target="base/scripts/db-restore.sh"         && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
   target="base/scripts/db-seed.sh"            && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
-  target="base/scripts/init-app-env.sh"       && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+  target="base/scripts/multienv-init-app.sh"  && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
   target="base/scripts/storage-build.sh"      && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
 }
 
 
 function doCopyJsonExample() {
-  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/app/BUILD-INFO.json.example" "${BASE_DIR}/.." "644"
-  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/app/ENVIRONMENT.json.example" "${BASE_DIR}/../" "644"
+  wsCertifyPath "$(realpath "${BASE_DIR}/../.example")"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/.example/app/BUILD-INFO.json.example" "${BASE_DIR}/../.example/" "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/.example/app/ENVIRONMENT.json.example" "${BASE_DIR}/../.example/" "644"
 }
 
 
 function doCopyPostCloneExample() {
   wsCertifyPath "$(realpath "${BASE_DIR}/../post-clone")"
-  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/app/post-clone/setup.local.sh.example" "${BASE_DIR}/../post-clone/setup.local.sh" "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/.example/app/post-clone/setup.local.sh.example" "${BASE_DIR}/../post-clone/setup.local.sh" "644"
   wsCopyFileIfNotExists "${BASE_DIR}/base/post-clone/.gitignore" "${BASE_DIR}/../post-clone/.gitignore" "644"
   wsCopyFileIfNotExists "${BASE_DIR}/base/post-clone/setup.sh" "${BASE_DIR}/../post-clone/setup.sh" "755"
 }
@@ -159,7 +161,7 @@ function doCopyPostCloneExample() {
 
 function doCopyGitRepoExample() {
   wsCertifyPath "$(realpath "${BASE_DIR}/../.git-repo")"
-  wsCopyFileIfNotExists "${BASE_DIR}/base/examples/app/git-repo/git-repo.env.sh.example" "${BASE_DIR}/../.git-repo/git-repo.env.sh" "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/base/.example/app/git-repo/git-repo.env.sh.example" "${BASE_DIR}/../.git-repo/git-repo.env.sh" "644"
 }
 
 
@@ -171,7 +173,7 @@ function doCopyDockerExample() {
     return
   fi
   wsCertifyPath "${target}"
-  cp -vr "${BASE_DIR}/base/examples/app/docker" "${BASE_DIR}/../"
+  cp -vr "${BASE_DIR}/base/.example/app/docker" "${BASE_DIR}/../"
 }
 
 
@@ -183,7 +185,7 @@ function doCopySailExample() {
     return
   fi
   wsCertifyPath "${target}"
-  cp -vr "${BASE_DIR}/base/examples/app/sail" "${BASE_DIR}/../"
+  cp -vr "${BASE_DIR}/base/.example/app/sail" "${BASE_DIR}/../"
 }
 
 #-- template and examples

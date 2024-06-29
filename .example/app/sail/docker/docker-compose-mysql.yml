@@ -4,7 +4,9 @@ services:
         build:
             context: ./mysql
             dockerfile: Dockerfile
-        image: ${COMPOSE_PROJECT_NAME}/mysql:8.0
+            args:
+                MYSQL_VERSION: ${MYSQL_VERSION}
+        image: ${COMPOSE_PROJECT_NAME}/mysql:${MYSQL_VERSION}
         container_name: ${SAIL_SERVICE_MYSQL}
         ports:
             - ${MYSQL_FORWARD_PORT}:3306

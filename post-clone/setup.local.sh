@@ -67,7 +67,7 @@ fi
 
 function doCopyPostCloneExample() {
   wsCertifyPath "$(realpath "${BASE_DIR}/../post-clone")"
-  wsCopyFileIfNotExists "${BASE_DIR}/examples/support/post-clone/setup.local.sh.example" "${BASE_DIR}/../post-clone/setup.local.sh" "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/.example/support/post-clone/setup.local.sh.example" "${BASE_DIR}/../post-clone/setup.local.sh" "644"
   wsCopyFileIfNotExists "${BASE_DIR}/post-clone/.gitignore" "${BASE_DIR}/../post-clone/.gitignore" "644"
   wsCopyFileIfNotExists "${BASE_DIR}/post-clone/setup.sh" "${BASE_DIR}/../post-clone/setup.sh" "755"
 }
@@ -75,12 +75,12 @@ function doCopyPostCloneExample() {
 
 function doCopyGitRepoExample() {
   wsCertifyPath "$(realpath "${BASE_DIR}/../.git-repo")"
-  wsCopyFileIfNotExists "${BASE_DIR}/examples/support/git-repo/git-repo.env.sh.example" "${BASE_DIR}/../.git-repo/git-repo.env.sh" "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/.example/support/git-repo/git-repo.env.sh.example" "${BASE_DIR}/../.git-repo/git-repo.env.sh" "644"
 }
 
 
 function doCopyGitignoreExample() {
-  wsCopyFileIfNotExists "${BASE_DIR}/examples/support/.gitignore.example" "${BASE_DIR}/../.gitignore" "644"
+  wsCopyFileIfNotExists "${BASE_DIR}/.example/support/.gitignore.example" "${BASE_DIR}/../.gitignore" "644"
 }
 
 #-- template and examples

@@ -23,7 +23,7 @@ Use: $(basename $0) <options>
 
 options:
    --owner <owner>      Storage's user owner
-   --www-group <group>  Group of WWW server; optional
+   --www-group <group>  Group of WWW server; Default: www-data
    --help               Show this help
 "
 #-- get parameters
@@ -57,8 +57,9 @@ done
 
 [ -n "${pOwner}" ] || wsError "Parameter not supplied: owner"
 
+[ -n "${pWwwGroup}" ] || pWwwGroup="www-data"
+
 STORAGE_DIR="${APP_DIR}/storage"
-TCPDF_DIR="${APP_DIR}/legacy/tcpdf"
 
 echo "Get SUDO credentials"
 sudo ls -alF > /dev/null

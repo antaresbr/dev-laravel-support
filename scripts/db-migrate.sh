@@ -19,6 +19,7 @@ pEnv=""
 pAffix=""
 pFresh=""
 pSeed=""
+pPath=""
 pNoHeaderInfos=""
 #-- help message
 msgHelp="
@@ -26,10 +27,11 @@ Use: $(basename $0) <options>
 
 options:
    --env <env>        Env file/ID
-   --affix            Affix to be included in database vars;
+   --affix <affix>    Affix to be included in database vars;
                       e.g.: If --affix audit is specified, the variables DB_AUDIT_* will be used instead of DB_*
    --fresh            Flag to get a fresh database
    --seed             Flag to seed the database
+   --path <path>      Path to migration files
    --no-header-infos  Flag to not show environment variables
    --help             Show this help
 "
@@ -37,7 +39,7 @@ options:
 while [ $# -gt 0 ]
 do
   case "$1" in
-    "--env" | '--affix' )
+    "--env" | "--affix" | "--path" )
       zp="$1"
       shift 1
       [ $# -lt 1 ] && wsError "Parameter: ${zp}, value not supplied"
@@ -49,6 +51,9 @@ do
         "--affix")
           pAffix="$1"
           [ -z "${pAffix}" ] || SUPP_AFFIX="_${pAffix^^}"
+        ;;
+        "--path")
+          pPath="$1"
         ;;
       esac
     ;;
@@ -72,6 +77,8 @@ do
   [ $# -gt 0 ] && shift 1
 done
 
+[ -n "${pPath}" ] && [ ! -d "${pPath}" ] && supError "Path not found: ${pPath}"
+
 supLoadEnvsAndLibs
 [ $? -eq 0 ] || supError "Fail on supLoadEnvsAndLibs"
 
@@ -81,7 +88,11 @@ supAbortIfProduction
 artParams="migrate"
 [ -z "${pFresh}" ] || artParams="${artParams}:fresh"
 [ -z "${pEnv}" ] || artParams="${artParams} --env=${pEnv}"
+artParams="${artParams} --database "${SUPP_DB_CONNECTION}""
+[ -z "${pPath}" ] || artParams="${artParams} --realpath --path=${pPath}"
+
 php artisan ${artParams}
 [ $? -eq 0 ] || supError "Fail to migrate"
+echo ""
 
 [ -z "${pSeed}" ] || "${SUPP_BASE_SCRIPT_DIR}/db-seed.sh" --no-header-infos --env "${pEnv}" --affix "${pAffix}"

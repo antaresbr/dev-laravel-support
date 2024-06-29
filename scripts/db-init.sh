@@ -27,7 +27,7 @@ Use: $(basename $0) <options>
 
 options:
    --env <env>        Env file/ID
-   --affix            Affix to be included in database vars;
+   --affix <affix>    Affix to be included in database vars;
                       e.g.: If --affix audit is specified, the variables DB_AUDIT_* will be used instead of DB_*
    --init-user        Flag to initialize database user
    --migrate          Flag to execute the migrations
@@ -39,7 +39,7 @@ options:
 while [ $# -gt 0 ]
 do
   case "$1" in
-    "--env" | '--affix' )
+    "--env" | "--affix" )
       zp="$1"
       shift 1
       [ $# -lt 1 ] && wsError "Parameter: ${zp}, value not supplied"

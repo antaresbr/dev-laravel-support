@@ -1,7 +1,9 @@
 #!/bin/bash
 
-TRIGGERS_DIR="$(dirname "$0")"
+TRIGGERS_DIR="$(dirname "${BASH_SOURCE[0]}")"
 START_DIR=$(pwd)
+
+[ -n "${SAIL_DIR}" ] || SAIL_DIR="$(dirname "${TRIGGERS_DIR}")"
 
 [ "$(type -t _bootError)" == "function" ] || function _bootError() {
   local scriptName="$(basename "$(realpath "$1")")" && shift

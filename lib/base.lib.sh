@@ -12,6 +12,7 @@ SUPP_BASE_DIR=$(dirname "${SUPP_BASE_LIB_DIR}")
 SUPP_BASE_SCRIPT_DIR="${SUPP_BASE_DIR}/scripts"
 SUPP_BASE_TINKER_DIR="${SUPP_BASE_DIR}/tinker"
 SUPP_DIR=$(dirname "${SUPP_BASE_DIR}")
+SUPP_SCRIPT_DIR="${SUPP_DIR}/scripts"
 APP_DIR=$(dirname "${SUPP_DIR}")
 START_DIR=$(pwd)
 
@@ -142,11 +143,7 @@ function supLoadEnvsAndLibs() {
   fi
 }
 
-
-if [ -z "${SERVER_ENVIRONMENT}" ]
-then
-  supError "SERVER_ENVIRONMENT não definido"
-fi
+[ -n "${SERVER_ENVIRONMENT}" ] || supError "SERVER_ENVIRONMENT não definido"
 
 wsSourceFile "${SUPP_DIR}/env/${SERVER_ENVIRONMENT}-env"
 

@@ -1,0 +1,226 @@
+#!/bin/bash
+
+echo ""
+echo "---[ $(dirname "$(realpath "${SCRIPT_DIR}")") ]---"
+echo "---| post-clone/$(basename "${BASH_SOURCE[0]}")"
+
+[ -z "${WORKSPACE_BASE_LIB_SH}" ] && echo -e "post-clone/setup-local | ERROR | WORKSPACE_BASE_LIB_SH not defined" && exit 1
+[ -z "${POST_CLONE_SETUP_LIB_SH}" ] && wsError "post-clone/setup-local" "POST_CLONE_SETUP_LIB_SH not defined"
+[ -z "${POST_CLONE_LIB_SH}" ] && wsError "post-clone/setup-local" "POST_CLONE_LIB_SH not defined"
+
+#---[ setup-local ]---
+
+function localSailSetup() {
+  echo "local sail setup"
+}
+
+#-- parameters
+
+pclLoadSavedParams
+
+echo ""
+
+[ -n "${pSailProject}" ] || envVarRead "Sail project" "pSailProject" "required|lower-case" ""
+[ -n "${pSailSubproject}" ] || envVarRead "Sail subproject" "pSailSubproject" "default:$(basename "$(realpath "${BASE_DIR}")")|required|lower-case" ""
+
+[ -n "${pUbuntuCodname}" ] || envVarRead "Ubuntu codename" "pUbuntuCodname" "default:jammy|required|lower-case" ""
+[ -n "${pPhpVersion}" ] || envVarRead "PHP version" "pPhpVersion" "default:8.2|required" ""
+[ -n "${pNodeVersion}" ] || envVarRead "Node version" "pNodeVersion" "default:20|required" ""
+
+[ -n "${pAppPort}" ] || envVarRead "APP port" "pAppPort" "default:7001|required" ""
+[ -n "${pEnableAsync}" ] || envVarRead "Enable async jobs app" "pEnableAsync" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+
+defRedisForwardPort="7004"
+[ -n "${pEnableRedis}" ] || envVarRead "Enable REDIS" "pEnableRedis" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+[ "${pEnableRedis:0:1}" == "n" ] || [ -n "${pRedisForwardPort}" ] || envVarRead "REDIS forward port" "pRedisForwardPort" "default:${defRedisForwardPort}|required"
+
+defMemcachedForwardPort="7004"
+[ -n "${pEnableMemcached}" ] || envVarRead "Enable Memcached" "pEnableMemcached" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+[ "${pEnableMemcached:0:1}" == "n" ] || [ -n "${pMemcacedForwardPort}" ] || envVarRead "Memcached forward port" "pMemcacedForwardPort" "default:${defMemcachedForwardPort}|required"
+
+defMysqlVersion="8.0"
+defMysqlRootPassword="secret"
+defMysqlForwardPort="7004"
+[ -n "${pEnableMysql}" ] || envVarRead "Enable MySQL" "pEnableMysql" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+if [ "${pEnableMysql:0:1}" == "y" ]
+then
+  [ -n "${pMysqlVersion}" ] || envVarRead "MySQL version" "pMysqlVersion" "default:${defMysqlVersion}|required"
+  [ -n "${pMysqlRootPassword}" ] || envVarRead "MySQL root password" "pMysqlRootPassword" "default:${defMysqlRootPassword}|required"
+  [ -n "${pMysqlForwardPort}" ] || envVarRead "MySQL forward port" "pMysqlForwardPort" "default:${defMysqlForwardPort}|required"
+fi
+
+defPostgresVersion="16"
+defPostgresRootUsername="postgres"
+defPostgresRootPassword="secret"
+defPostgresForwardPort="7005"
+[ -n "${pEnablePostgres}" ] || envVarRead "Enable Postgres" "pEnablePostgres" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+if [ "${pEnablePostgres:0:1}" == "y" ]
+then
+  [ -n "${pPostgresVersion}" ] || envVarRead "Postgres version" "pPostgresVersion" "default:${defPostgresVersion}|required"
+  [ -n "${pPostgresRootUsername}" ] || envVarRead "Postgres root user" "pPostgresRootUsername" "default:${defPostgresRootUsername}|required"
+  [ -n "${pPostgresRootPassword}" ] || envVarRead "Postgres root password" "pPostgresRootPassword" "default:${defPostgresRootPassword}|required"
+  [ -n "${pPostgresForwardPort}" ] || envVarRead "Postgres forward port" "pPostgresForwardPort" "default:${defPostgresForwardPort}|required"
+fi
+
+echo ""
+echo "---[ parameters ]---"
+echo ""
+echo "ENVIRONMENT : ${pEnvironment}"
+echo ""
+echo "pEnableSail          : ${pEnableSail}"
+echo "pSailProject         : ${pSailProject}"
+echo "pSailSubproject      : ${pSailSubproject}"
+echo "pUbuntuCodname       : ${pUbuntuCodname}"
+echo "pPhpVersion          : ${pPhpVersion}"
+echo "pNodeVersion         : ${pNodeVersion}"
+echo "pAppPort             : ${pAppPort}"
+echo "pEnableAsync         : ${pEnableAsync}"
+echo "pEnableRedis         : ${pEnableRedis}"
+if [ "${pEnableRedis:0:1}" == "y" ]
+then
+  echo "pRedisForwardPort    : ${pRedisForwardPort}"
+fi
+echo "pEnableMemcached     : ${pEnableMemcached}"
+if [ "${pEnableMemcached:0:1}" == "y" ]
+then
+  echo "pMemcacedForwardPort : ${pMemcacedForwardPort}"
+fi
+echo "pEnableMysql         : ${pEnableMysql}"
+if [ "${pEnableMysql:0:1}" == "y" ]
+then
+  echo "pMysqlVersion        : ${pMysqlVersion}"
+  echo "pMysqlRootPassword   : ${pMysqlRootPassword}"
+  echo "pMysqlForwardPort    : ${pMysqlForwardPort}"
+fi
+echo "pEnablePostgres        : ${pEnablePostgres}"
+if [ "${pEnablePostgres:0:1}" == "y" ]
+then
+  echo "pPostgresVersion       : ${pPostgresVersion}"
+  echo "pPostgresRootUsername  : ${pPostgresRootUsername}"
+  echo "pPostgresRootPassword  : ${pPostgresRootPassword}"
+  echo "pPostgresForwardPort   : ${pPostgresForwardPort}"
+fi
+echo ""
+
+[ -n "${pConfirm}" ] || envVarRead "Confirm parameters?" "pConfirm" "default:yes|lower-case|hide-values" "y|yes|n|no"
+[ "${pConfirm:0:1}" == "y" ] || exit 0
+
+if [ ! -f "${SCRIPT_DIR}/setup.local.env" ]
+then
+  echo""
+  envVarRead "Save post-clone params?" "pSavePostcloneParams" "default:yes|lower-case|hide-values" "y|yes|n|no"
+  if [ "${pConfirm:0:1}" == "y" ]
+  then
+    echo "\
+#!/bin/bash
+pEnableSail=\"${pEnableSail}\"
+pSailProject=\"${pSailProject}\"
+pSailSubproject=\"${pSailSubproject}\"
+pUbuntuCodname=\"${pUbuntuCodname}\"
+pPhpVersion=\"${pPhpVersion}\"
+pNodeVersion=\"${pNodeVersion}\"
+pAppPort=\"${pAppPort}\"
+pEnableAsync=\"${pEnableAsync}\"
+pEnableRedis=\"${pEnableRedis}\"
+pRedisForwardPort=\"${pRedisForwardPort}\"
+pEnableMemcached=\"${pEnableMemcached}\"
+pMemcacedForwardPort=\"${pMemcacedForwardPort}\"
+pEnableMysql=\"${pEnableMysql}\"
+pMysqlVersion=\"${pMysqlVersion}\"
+pMysqlRootPassword=\"${pMysqlRootPassword}\"
+pMysqlForwardPort=\"${pMysqlForwardPort}\"
+pEnablePostgres=\"${pEnablePostgres}\"
+pPostgresVersion=\"${pPostgresVersion}\"
+pPostgresRootUsername=\"${pPostgresRootUsername}\"
+pPostgresRootPassword=\"${pPostgresRootPassword}\"
+pPostgresForwardPort=\"${pPostgresForwardPort}\"
+" > "${SCRIPT_DIR}/setup.local.env"
+  fi
+fi
+
+[ "${pEnableAsync:0:1}" == "y" ] && pEnableAsync="true" || pEnableAsync="false"
+[ "${pEnableRedis:0:1}" == "y" ] && pEnableRedis="true" || pEnableRedis="false"
+[ "${pEnableMemcached:0:1}" == "y" ] && pEnableMemcached="true" || pEnableMemcached="false"
+[ "${pEnableMysql:0:1}" == "y" ] && pEnableMysql="true" || pEnableMysql="false"
+[ "${pEnablePostgres:0:1}" == "y" ] && pEnablePostgres="true" || pEnablePostgres="false"
+
+WS_TEMPLATE_FILE_VARS="\
+SAIL_PROJECT=${pSailProject}
+SAIL_SUBPROJECT=${pSailSubproject}
+UBUNTU_CODENAME=${pUbuntuCodname}
+PHP_VERSION=${pPhpVersion}
+NODE_VERSION=${pNodeVersion}
+APP_PORT=${pAppPort}
+SAIL_ASYNC=${pEnableAsync}
+SAIL_REDIS=${pEnableRedis}
+REDIS_FORWARD_PORT=${pRedisForwardPort:-$defRedisForwardPort}
+SAIL_MEMCACHED=${pEnableMemcached}
+MEMCACHED_FORWARD_PORT=${pMemcacedForwardPort:-$defMemcachedForwardPort}
+SAIL_MYSQL=${pEnableMysql}
+MYSQL_VERSION=${pMysqlVersion:-$defMysqlVersion}
+MYSQL_ROOT_PASSWORD=${pMysqlRootPassword:-$defMysqlRootPassword}
+MYSQL_FORWARD_PORT=${pMysqlForwardPort:$defMysqlForwardPort}
+SAIL_POSTGRES=${pEnablePostgres}
+POSTGRES_VERSION=${pPostgresVersion:-$defPostgresVersion}
+POSTGRES_ROOT_USERNAME=${pPostgresRootUsername:-$defPostgresRootUsername}
+POSTGRES_ROOT_PASSWORD=${pPostgresRootPassword:-$defPostgresRootPassword}
+POSTGRES_FORWARD_PORT=${pPostgresForwardPort:-$defPostgresForwardPort}
+"
+
+#-- sail
+
+sailSetup
+
+#-- template
+
+wsTemplateFile "BUILD-INFO.json" ".example/BUILD-INFO.json.example"
+wsTemplateFile "ENVIRONMENT.json" ".example/ENVIRONMENT.json.example"
+
+#-- build
+
+sailBuild
+
+#-- ambiente
+
+echo ""
+echo "Environment starting up"
+sail/sail up -d
+
+echo ""
+echo "Waiting container 'app'"
+
+sailUp=""
+while [ -z "${sailUp}" ]
+do
+  sailAppExec ls > /dev/null
+  if [ $? -eq 0 ]
+  then
+    sailUp="TRUE"
+  else
+    sleep 3
+  fi
+done
+
+if [ "${sailUp}" == "TRUE" ]
+then
+  #-- storage-build
+  echo ""
+  echo "storabe-build"
+  sailAppExecAsRoot support/storage-build.sh --owner sail
+
+  #-- npm
+  if [ -f "package.json" ] && [ ! -d "node_modules" ]
+  then
+    echo ""
+    echo "npm install"
+    sailAppExec npm install
+  fi
+
+  #-- composer
+  if [ -f "composer.json" ] && [ ! -d "vendor" ]
+  then
+    echo ""
+    echo "composer update"
+    sailAppExec composer update
+  fi
+fi
