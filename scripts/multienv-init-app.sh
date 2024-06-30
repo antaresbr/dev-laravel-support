@@ -79,7 +79,7 @@ do
 done
 
 [ -z "${pEnvId}" ] && supError "Parameter not supplied, env-id"
-[ "${pEnvId}" != "app" ] && [ "${#pEnvId}" -ne 4 ] && supError "Invalid parameter value, env-id ${pEnvId}"
+[ -z "${pEnvId//[0-9]}" ] && [ "${#pEnvId}" -ne 4 ] && supError "Invalid parameter value, env-id ${pEnvId}"
 
 [ -z "${pLinkId}" ] && [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ] && pLinkId="${pEnvId}"
 [ -z "${pLinkId}" ] && supError "Parameter not supplied, link-id"
