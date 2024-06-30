@@ -48,7 +48,7 @@ function pgsql_exec_file() {
   cat "${zFile}" \
     | sed "s/\`{{@DB_USER@}}\`/\`${SUPP_DB_USERNAME}\`/g" \
     | sed "s/\`dbadmin\`/\`${SUPP_DB_USERNAME}\`/g" \
-    | $(pgsql_cmd $@) --database=${SUPP_DB_DATABASE}
+    | $(pgsql_cmd $@) ${SUPP_DB_DATABASE}
 }
 
 
@@ -78,9 +78,13 @@ function pgsql_init_db() {
   if [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ]
   then
     $(pgsql_cmd) --command="DROP DATABASE IF EXISTS ${SUPP_DB_DATABASE};"
+    [ $? -ne 0 ] && supError "Fail to drop database."
   fi
   $(pgsql_cmd) --command="CREATE DATABASE ${SUPP_DB_DATABASE} ${PGSQL_DB_PREDICATES};"
   [ $? -ne 0 ] && supError "Fail to create database."
+  
+  $(pgsql_cmd) --command="ALTER DATABASE ${SUPP_DB_DATABASE} OWNER TO ${SUPP_DB_USERNAME};"
+  [ $? -ne 0 ] && supError "Fail to onwer database."
 
   pgsql_unset_credentials
 }
@@ -98,11 +102,16 @@ function pgsql_init_user() {
 
     pgsql_root_credentials
 
-    $(pgsql_cmd) --command="SELECT 'CREATE USER ${SUPP_DB_USERNAME}' WHERE NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${SUPP_DB_USERNAME}');"
-    $(pgsql_cmd) --command="ALTER USER ${SUPP_DB_USERNAME} WITH ENCRYPTED PASSWORD '${SUPP_DB_PASSWORD}';"
-    $(pgsql_cmd) --command="GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${SUPP_DB_USERNAME};"
-    $(pgsql_cmd) --command="GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${SUPP_DB_USERNAME};"
-    $(pgsql_cmd) --command="GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO ${SUPP_DB_USERNAME};"
+    $(pgsql_cmd) ${SUPP_DB_DATABASE} --command="\
+do \$\$ begin
+  if not exists (select * from pg_user where usename = '${SUPP_DB_USERNAME}') then
+     create user ${SUPP_DB_USERNAME};
+  end if;
+end \$\$ ;"
+    $(pgsql_cmd) ${SUPP_DB_DATABASE} --command="ALTER USER ${SUPP_DB_USERNAME} WITH ENCRYPTED PASSWORD '${SUPP_DB_PASSWORD}';"
+    $(pgsql_cmd) ${SUPP_DB_DATABASE} --command="GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${SUPP_DB_USERNAME};"
+    $(pgsql_cmd) ${SUPP_DB_DATABASE} --command="GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${SUPP_DB_USERNAME};"
+    $(pgsql_cmd) ${SUPP_DB_DATABASE} --command="GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO ${SUPP_DB_USERNAME};"
 
     pgsql_unset_credentials
   fi

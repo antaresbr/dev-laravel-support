@@ -96,13 +96,14 @@ function supLoadEnvsAndLibs() {
   [ -z "${SUPP_AFFIX}" ] && SUPP_DB_DRIVER="${DB_DRIVER}"
   [ -n "${SUPP_DB_DRIVER}" ] || supError "Impossible to get SUPP_DB_DRIVER <DB${SUPP_AFFIX}_DRIVER>"
 
-  [ "$(envVarGet ${SUPP_DB_DRIVER}_ROOT_USERNAME)" != "{{DB_USERNAME}}" ] || ${SUPP_DB_DRIVER}_ROOT_USERNAME="${DB_USERNAME}"
-  [ "$(envVarGet ${SUPP_DB_DRIVER}_ROOT_PASSWORD)" != "{{DB_PASSWORD}}" ] || ${SUPP_DB_DRIVER}_ROOT_PASSWORD="${DB_PASSWORD}"
-
-  [ -z "$(envVarGet ${SUPP_DB_DRIVER}_ROOT_USERNAME)" ] && supError "${_fn}" "${SUPP_DB_DRIVER}_ROOT_USERNAME not defined"
-  [ -z "$(envVarGet ${SUPP_DB_DRIVER}_ROOT_PASSWORD)" ] && supError "${_fn}" "${SUPP_DB_DRIVER}_ROOT_PASSWORD not defined"
-  
   wsSourceFile "${SUPP_DIR}/env/${SUPP_DB_DRIVER}-${SERVER_ENVIRONMENT}-env"
+
+  [ "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)" != "{{DB_USERNAME}}" ] || ${SUPP_DB_DRIVER^^}_ROOT_USERNAME="${DB_USERNAME}"
+  [ "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)" != "{{DB_PASSWORD}}" ] || ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD="${DB_PASSWORD}"
+
+  [ -z "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)" ] && supError "${_fn}" "${SUPP_DB_DRIVER^^}_ROOT_USERNAME not defined"
+  [ -z "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)" ] && supError "${_fn}" "${SUPP_DB_DRIVER^^}_ROOT_PASSWORD not defined"
+  
   wsSourceFile "${SUPP_BASE_LIB_DIR}/${SUPP_DB_DRIVER}.lib.sh"
 
   SUPP_DB_CONNECTION="$(envVarGet "DB${SUPP_AFFIX}_CONNECTION")"
@@ -122,18 +123,21 @@ function supLoadEnvsAndLibs() {
   if [ "${SUPP_SHOW_DB_INFOS^^}" != "FALSE" ] && [ -z "${pNoHeaderInfos}" ]
   then
     echo ""
-    echo " SUPP_DB_DRIVER     : ${SUPP_DB_DRIVER}"
-    echo " SUPP_DB_CONNECTION : ${SUPP_DB_CONNECTION}"
-    echo " SUPP_DB_HOST       : ${SUPP_DB_HOST}"
-    echo " SUPP_DB_PORT       : ${SUPP_DB_PORT}"
-    echo " SUPP_DB_USERNAME   : ${SUPP_DB_USERNAME}"
+    echo " SUPP_DB_DRIVER      : ${SUPP_DB_DRIVER}"
+    echo " SUPP_DB_CONNECTION  : ${SUPP_DB_CONNECTION}"
+    echo " SUPP_DB_HOST        : ${SUPP_DB_HOST}"
+    echo " SUPP_DB_PORT        : ${SUPP_DB_PORT}"
+    echo " SUPP_DB_DATABASE    : ${SUPP_DB_DATABASE}"
+    echo " SUPP_DB_USERNAME    : ${SUPP_DB_USERNAME}"
     if [ "${SERVER_ENVIRONMENT}" == "${PRODUCTION_ENVIRONMENT}" ]
     then
-      echo " SUPP_DB_PASSWORD   : ******"
+      echo " SUPP_DB_PASSWORD    : ******"
     else
-      echo " SUPP_DB_PASSWORD   : ${SUPP_DB_PASSWORD}"
+      echo " SUPP_DB_PASSWORD    : ${SUPP_DB_PASSWORD}"
+      echo ""
+      echo " ${SUPP_DB_DRIVER^^}_ROOT_USERNAME : $(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)"
+      echo " ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD : $(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)"
     fi
-    echo " SUPP_DB_DATABASE   : ${SUPP_DB_DATABASE}"
     if [ "${SERVER_ENVIRONMENT}" == "${PRODUCTION_ENVIRONMENT}" ]
     then
       echo ""
