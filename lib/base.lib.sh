@@ -46,6 +46,17 @@ function supError() {
 }
 
 
+function supWarn() {
+  local msgPrefix="support-lib"
+  if [ $# -gt 1 ]
+  then
+    msgPrefix="${msgPrefix} | $1"
+    shift
+  fi
+  wsWarn "${msgPrefix}" "$@"
+}
+
+
 function supMakeDir() {
   local zDir="$1"
   if [ -n "${zDir}" ]

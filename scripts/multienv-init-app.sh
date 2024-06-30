@@ -101,7 +101,7 @@ ${pVar}
 "
 
 [ ! -f "${envExample}" ] && supError "File not found: ${envExample}"
-[ -f "${envFile}" ] && supError "File already exists: ${envFile}"
+[ -f "${envFile}" ] && { supWarn "File already exists: ${envFile}"; exit 0; }
 
 wsTemplateFile "${envFile}" "${envExample}" "${envVars}"
 
