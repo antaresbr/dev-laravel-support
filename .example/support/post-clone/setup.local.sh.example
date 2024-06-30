@@ -24,8 +24,13 @@ echo ""
 [ -n "${pAppEnvDir}" ]      || envVarRead "env/${pEnvironment}-env : APP_ENV_DIR" "pAppEnvDir" "" ""
 [ -n "${pUrlProto}" ]       || envVarRead "env/${pEnvironment}-env : URL_PROTO" "pUrlProto" "default:http|required|lower-case|hide-values" "http|https"
 [ -n "${pUrlDomain}" ]      || envVarRead "env/${pEnvironment}-env : URL_DOMAIN" "pUrlDomain" "default:${pAppName}.${pEnvironment}|required|lower-case" ""
-[ -n "${pDbRootUsername}" ] || envVarRead "env/${pEnvironment}-env : DB_ROOT_USERNAME" "pDbRootUsername" "default:{{DB_USERNAME}}|required" ""
-[ -n "${pDbRootPassword}" ] || envVarRead "env/${pEnvironment}-env : DB_ROOT_PASSWORD" "pDbRootPassword" "default:{{DB_PASSWORD}}|required" ""
+
+echo ""
+[ -n "${pMysqlRootUsername}" ] || envVarRead "MYSQL_ROOT_USERNAME" "pMysqlRootUsername" "default:{{DB_USERNAME}}" ""
+[ -n "${pMysqlRootPassword}" ] || envVarRead "MYSQL_ROOT_PASSWORD" "pMysqlRootPassword" "default:{{DB_USERNAME}}" ""
+echo ""
+[ -n "${pPgsqlRootUsername}" ] || envVarRead "PGSQL_ROOT_USERNAME" "pPgsqlRootUsername" "default:{{DB_USERNAME}}" ""
+[ -n "${pPgsqlRootPassword}" ] || envVarRead "PGSQL_ROOT_PASSWORD" "pPgsqlRootPassword" "default:{{DB_USERNAME}}" ""
 
 [ "${pAppEnvDir}" = ":none:" ] && pAppEnvDir=""
 
@@ -74,8 +79,11 @@ echo ""
 echo "APP_ENV_DIR      : ${pAppEnvDir}"
 echo "URL_PROTO        : ${pUrlProto}"
 echo "URL_DOMAIN       : ${pUrlDomain}"
-echo "DB_ROOT_USERNAME : ${pDbRootUsername}"
-echo "DB_ROOT_PASSWORD : ${pDbRootPassword}"
+echo ""
+echo "MYSQL_ROOT_USERNAME : ${pMysqlRootUsername}"
+echo "MYSQL_ROOT_PASSWORD : ${pMysqlRootPassword}"
+echo "PGSQL_ROOT_USERNAME : ${pPgsqlRootUsername}"
+echo "PGSQL_ROOT_PASSWORD : ${pPgsqlRootPassword}"
 echo ""
 echo "pLinksToBaseBaseScripts : ${pLinksToBaseBaseScripts}"
 echo "pCopyGitRepoExample     : ${pCopyGitRepoExample}"
@@ -99,8 +107,10 @@ pAppName=\"${pAppName}\"
 pAppEnvDir=\"${pAppEnvDir:-:none:}\"
 pUrlProto=\"${pUrlProto}\"
 pUrlDomain=\"${pUrlDomain}\"
-pDbRootUsername=\"${pDbRootUsername}\"
-pDbRootPassword=\"${pDbRootPassword}\"
+pMysqlRootUsername=\"${pMysqlRootUsername}\"
+pMysqlRootPassword=\"${pMysqlRootPassword}\"
+pPgsqlRootUsername=\"${pPgsqlRootUsername}\"
+pPgsqlRootPassword=\"${pPgsqlRootPassword}\"
 pLinksToBaseBaseScripts=\"${pLinksToBaseBaseScripts}\"
 pCopyGitRepoExample=\"${pCopyGitRepoExample}\"
 pCopyPostCloneExample=\"${pCopyPostCloneExample}\"
@@ -115,16 +125,25 @@ fi
 function doEnvFiles() {
   wsCertifyPath "$(realpath "${BASE_DIR}/env")"
 
-  echo "env/${pEnvironment}-env"
-  wsTemplateFile "${BASE_DIR}/env/${pEnvironment}-env" "${BASE_DIR}/base/.example/support/env/env-example" "\
+  local envFilesVars="\
 APP_ENV_DIR=${pAppEnvDir}
 URL_PROTO=${pUrlProto}
 URL_DOMAIN=${pUrlDomain}
-DB_ROOT_USERNAME=${pDbRootUsername}
-DB_ROOT_PASSWORD=${pDbRootPassword}
+MYSQL_ROOT_USERNAME=${pMysqlRootUsername}
+MYSQL_ROOT_PASSWORD=${pMysqlRootPassword}
+PGSQL_ROOT_USERNAME=${pPgsqlRootUsername}
+PGSQL_ROOT_PASSWORD=${pPgsqlRootPassword}
 "
+  echo "env/${pEnvironment}-env"
+  wsTemplateFile "${BASE_DIR}/env/${pEnvironment}-env" "${BASE_DIR}/base/.example/support/env/env-example" "${envFilesVars}"
+
   echo "env/mysql-${pEnvironment}-env"
-  wsCopyFileIfNotExists "${BASE_DIR}/base/.example/support/env/mysql-env-example" "${BASE_DIR}/env/mysql-${pEnvironment}-env"
+  wsTemplateFile "${BASE_DIR}/env/mysql-${pEnvironment}-env" "${BASE_DIR}/base/.example/support/env/mysql-env-example" "${envFilesVars}"
+
+  echo "env/pgsql-${pEnvironment}-env"
+  wsTemplateFile "${BASE_DIR}/env/pgsql-${pEnvironment}-env" "${BASE_DIR}/base/.example/support/env/pgsql-env-example" "${envFilesVars}"
+
+  echo "env/.gitignore"
   wsCopyFileIfNotExists "${BASE_DIR}/base/.example/support/env/.gitignore.example" "${BASE_DIR}/env/.gitignore"
 }
 

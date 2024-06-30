@@ -1,0 +1,24 @@
+services:
+
+    pgsql:
+        image: postgres:${PGSQL_VERSION}
+        container_name: ${SAIL_SERVICE_PGSQL}
+        ports:
+            - ${PGSQL_FORWARD_PORT}:5432
+        environment:
+            POSTGRES_USER: '${PGSQL_ROOT_USERNAME}'
+            POSTGRES_PASSWORD: '${PGSQL_ROOT_PASSWORD}'
+        volumes:
+            - 'sail-pgsql-vol:/var/lib/postgresql/data'
+        networks:
+            - sail-project-net
+            - sail-net
+        healthcheck:
+            test: ["CMD", "pg_isready", "-q", "-d", "postgres", "-U", "${PGSQL_ROOT_USERNAME}"]
+            retries: 3
+            timeout: 5s
+
+volumes:
+    sail-pgsql-vol:
+        driver: local
+        name: ${COMPOSE_PROJECT_NAME}-pgsql-vol

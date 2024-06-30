@@ -13,8 +13,8 @@ function mysql_unset_credentials() {
 
 
 function mysql_root_credentials() {
-  export MYSQL_USER="${DB_ROOT_USERNAME}"
-  export MYSQL_PWD="${DB_ROOT_PASSWORD}"
+  export MYSQL_USER="${MYSQL_ROOT_USERNAME}"
+  export MYSQL_PWD="${MYSQL_ROOT_PASSWORD}"
 }
 
 
@@ -89,7 +89,7 @@ function mysql_init_db() {
 function mysql_init_user() {
   local _fn="mysql_init_user"
 
-  if [ "${SUPP_FORCE_INIT_USER,,}" != "true" ] && [ "${DB_ROOT_USERNAME}" == "${SUPP_DB_USERNAME}" ]
+  if [ "${SUPP_FORCE_INIT_USER,,}" != "true" ] && [ "${MYSQL_ROOT_USERNAME}" == "${SUPP_DB_USERNAME}" ]
   then
     echo "${_fn} | same user ROOT_USERNAME and DB_USERNAME"
     echo "${_fn} | ignored"
@@ -112,12 +112,6 @@ function mysql_dump_to_file() {
   local dumpParams="${pDumpParams}"
   [ -n "${dumpParams}" ] || dumpParams="${MYSQL_DUMP_PARAMS}"
 
-  # mysqldump $(mysql_params) ${dumpParams} \
-  #   --no-tablespaces --no-create-db ${SUPP_DB_DATABASE} $@ \
-  #   | sed "s/\`${SUPP_DB_USERNAME}\`/\`{{@DB_USER@}}\`/g" \
-  #   | sed "s/\`dbadmin\`/\`{{@DB_USER@}}\`/g" \
-  #   > "${pFile}"
-
   mysqldump $(mysql_params) ${dumpParams} \
    --no-tablespaces --no-create-db ${SUPP_DB_DATABASE} $@ \
    > "${pFile}"
@@ -128,7 +122,6 @@ function mysql_dump_to_file() {
 
   sed -i "s/\`dbadmin\`/\`{{@DB_USER@}}\`/g" "${pFile}"
   _ec=$?; [ $_ec -eq 0 ] || return $_ec
-  
 }
 
 fi

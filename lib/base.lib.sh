@@ -96,11 +96,11 @@ function supLoadEnvsAndLibs() {
   [ -z "${SUPP_AFFIX}" ] && SUPP_DB_DRIVER="${DB_DRIVER}"
   [ -n "${SUPP_DB_DRIVER}" ] || supError "Impossible to get SUPP_DB_DRIVER <DB${SUPP_AFFIX}_DRIVER>"
 
-  [ "${DB_ROOT_USERNAME}" != "{{DB_USERNAME}}" ] || DB_ROOT_USERNAME="${DB_USERNAME}"
-  [ "${DB_ROOT_PASSWORD}" != "{{DB_PASSWORD}}" ] || DB_ROOT_PASSWORD="${DB_PASSWORD}"
+  [ "$(envVarGet ${SUPP_DB_DRIVER}_ROOT_USERNAME)" != "{{DB_USERNAME}}" ] || ${SUPP_DB_DRIVER}_ROOT_USERNAME="${DB_USERNAME}"
+  [ "$(envVarGet ${SUPP_DB_DRIVER}_ROOT_PASSWORD)" != "{{DB_PASSWORD}}" ] || ${SUPP_DB_DRIVER}_ROOT_PASSWORD="${DB_PASSWORD}"
 
-  [ -z "${DB_ROOT_USERNAME}" ] && supError "${_fn}" "DB_ROOT_USERNAME not defined"
-  [ -z "${DB_ROOT_PASSWORD}" ] && supError "${_fn}" "DB_ROOT_PASSWORD not defined"
+  [ -z "$(envVarGet ${SUPP_DB_DRIVER}_ROOT_USERNAME)" ] && supError "${_fn}" "${SUPP_DB_DRIVER}_ROOT_USERNAME not defined"
+  [ -z "$(envVarGet ${SUPP_DB_DRIVER}_ROOT_PASSWORD)" ] && supError "${_fn}" "${SUPP_DB_DRIVER}_ROOT_PASSWORD not defined"
   
   wsSourceFile "${SUPP_DIR}/env/${SUPP_DB_DRIVER}-${SERVER_ENVIRONMENT}-env"
   wsSourceFile "${SUPP_BASE_LIB_DIR}/${SUPP_DB_DRIVER}.lib.sh"
