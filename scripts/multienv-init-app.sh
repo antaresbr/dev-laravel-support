@@ -28,8 +28,8 @@ Use: $(basename $0) <options>
 
 options:
    --env-id <id>       Env File ID
-   --env-name <name>   Env file extension name
-   --link-id <id>      URL link prefix
+   --env-name <name>   Env file extension name; Default <env-id>
+   --link-id <id>      URL link prefix; Default <env-id>, if not in production environment
    --var <name=value>  Variable to be used in template; Can be specified multiple times
    --no-header-infos   Flag to not show environment variables
    --help              Show this help
@@ -81,13 +81,14 @@ done
 [ -z "${pEnvId}" ] && supError "Parameter not supplied, env-id"
 [ -z "${pEnvId//[0-9]}" ] && [ "${#pEnvId}" -ne 4 ] && supError "Invalid parameter value, env-id ${pEnvId}"
 
+[ -n "${pEnvName}" ] || pEnvName="${pEnvId}"
+
 [ -z "${pLinkId}" ] && [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ] && pLinkId="${pEnvId}"
 [ -z "${pLinkId}" ] && supError "Parameter not supplied, link-id"
 
 envDir="${APP_DIR}/${APP_ENV_DIR}"
 envExample="${envDir}/.example/.env.app.example"
-envFile="${envDir}/.env"
-[ -z "${pEnvName}" ] || envFile="${envFile}.${pEnvName}"
+envFile="${envDir}/.env.${pEnvName}"
 
 envVars="\
 ENVIRONMENT=${SERVER_ENVIRONMENT}
