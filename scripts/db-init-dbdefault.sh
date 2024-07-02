@@ -15,14 +15,12 @@
 _bootSource "${BASH_SOURCE[0]}" "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")/lib/base.lib.sh"
 
 #-- init parameters
-pInitUser=""
 pNoHeaderInfos=""
 #-- help message
 msgHelp="
 Use: $(basename $0) <options>
 
 options:
-   --init-user        Flag to initialize database user
    --no-header-infos  Flag to not show environment variables
    --help             Show this help
 "
@@ -30,9 +28,6 @@ options:
 while [ $# -gt 0 ]
 do
   case "$1" in
-    "--init-user")
-       pInitUser="$1"
-    ;;
     "--no-header-infos")
        pNoHeaderInfos="$1"
     ;;
@@ -60,11 +55,8 @@ ${SUPP_DB_DRIVER}_abort_if_exists_in_production
 ${SUPP_DB_DRIVER}_init_db
 [ $? -ne 0 ] && supError "Fail to init db"
 
-if [ -n "${pInitUser}" ]
-then
-  ${SUPP_DB_DRIVER}_init_user
-  [ $? -ne 0 ] && supError "Fail to init user"
-fi
+${SUPP_DB_DRIVER}_init_user
+[ $? -ne 0 ] && supError "Fail to init user"
 
 php artisan migrate --realpath \
   --env "${pEnv}" \
