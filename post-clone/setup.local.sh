@@ -52,7 +52,7 @@ if [ ! -f "${SCRIPT_DIR}/setup.local.env" ]
 then
   echo""
   envVarRead "Save post-clone params?" "pSavePostcloneParams" "default:yes|lower-case|hide-values" "y|yes|n|no"
-  if [ "${pConfirm:0:1}" == "y" ]
+  if [ "${pSavePostcloneParams:0:1}" == "y" ]
   then
     echo "\
 #!/bin/bash
