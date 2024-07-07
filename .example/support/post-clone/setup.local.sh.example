@@ -27,10 +27,10 @@ echo ""
 
 echo ""
 [ -n "${pMysqlRootUsername}" ] || envVarRead "MYSQL_ROOT_USERNAME" "pMysqlRootUsername" "default:{{DB_USERNAME}}" ""
-[ -n "${pMysqlRootPassword}" ] || envVarRead "MYSQL_ROOT_PASSWORD" "pMysqlRootPassword" "default:{{DB_USERNAME}}" ""
+[ -n "${pMysqlRootPassword}" ] || envVarRead "MYSQL_ROOT_PASSWORD" "pMysqlRootPassword" "default:{{DB_PASSWORD}}" ""
 echo ""
 [ -n "${pPgsqlRootUsername}" ] || envVarRead "PGSQL_ROOT_USERNAME" "pPgsqlRootUsername" "default:{{DB_USERNAME}}" ""
-[ -n "${pPgsqlRootPassword}" ] || envVarRead "PGSQL_ROOT_PASSWORD" "pPgsqlRootPassword" "default:{{DB_USERNAME}}" ""
+[ -n "${pPgsqlRootPassword}" ] || envVarRead "PGSQL_ROOT_PASSWORD" "pPgsqlRootPassword" "default:{{DB_PASSWORD}}" ""
 
 [ "${pAppEnvDir}" = ":none:" ] && pAppEnvDir=""
 
