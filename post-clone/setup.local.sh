@@ -35,6 +35,13 @@ then
   envVarRead "Copy <.gitignore> example to parent project?" "pCopyGitignoreExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
 fi
 
+[ -z "${PC_IGNORE_README_EXAMPLE}" ] || pCopyReadmeExample=no
+if [ -z "${pCopyReadmeExample}" ]
+then
+  echo""
+  envVarRead "Copy <README.md> example to parent project?" "pCopyReadmeExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+fi
+
 echo ""
 echo "---[ parameters ]---"
 echo ""
@@ -43,6 +50,7 @@ echo ""
 echo "pCopyPostCloneExample   : ${pCopyPostCloneExample}"
 echo "pCopyGitRepoExample     : ${pCopyGitRepoExample}"
 echo "pCopyGitignoreExample   : ${pCopyGitignoreExample}"
+echo "pCopyReadmeExample      : ${pCopyReadmeExample}"
 echo ""
 
 [ -n "${pConfirm}" ] || envVarRead "Confirm parameters?" "pConfirm" "default:yes|lower-case|hide-values" "y|yes|n|no"
@@ -59,6 +67,7 @@ then
 pCopyPostCloneExample=\"${pCopyPostCloneExample}\"
 pCopyGitRepoExample=\"${pCopyGitRepoExample}\"
 pCopyGitignoreExample=\"${pCopyGitignoreExample}\"
+pCopyReadmeExample=\"${pCopyReadmeExample}\"
 " > "${SCRIPT_DIR}/setup.local.env"
   fi
 fi
@@ -83,11 +92,16 @@ function doCopyGitignoreExample() {
   wsCopyFileIfNotExists "${BASE_DIR}/.example/support/.gitignore.example" "${BASE_DIR}/../.gitignore" "644"
 }
 
+
+function doCopyReadmeExample() {
+  wsCopyFileIfNotExists "${BASE_DIR}/.example/support/README.md.example" "${BASE_DIR}/../README.md" "644"
+}
+
 #-- template and examples
 
 echo ""
 echo ": .bootstrap.sh"
-wsCopyFileIfNotExists "${BASE_DIR}/.example/support/.bootstrap.sh" "${BASE_DIR}/../" "644"
+wsCopyFileIfNotExists "${BASE_DIR}/.example/support/.bootstrap.sh.example" "${BASE_DIR}/../.bootstrap.sh" "644"
 
 echo ""
 echo "---[ example to parent : post-clone ]---"
@@ -107,4 +121,24 @@ then
 else
   [ "${pCopyGitRepoExample:0:1}" == "y" ] && doCopyGitRepoExample
   [ "${pCopyGitRepoExample:0:1}" == "y" ] || echo "  ! skiped"
+fi
+
+echo ""
+echo "---[ example to parent : .gitignore ]---"
+if [ -n "${PC_IGNORE_GITIGNORE_EXAMPLE}" ]
+then
+  echo "  ! ignored"
+else
+  [ "${pCopyGitignoreExample:0:1}" == "y" ] && doCopyGitignoreExample
+  [ "${pCopyGitignoreExample:0:1}" == "y" ] || echo "  ! skiped"
+fi
+
+echo ""
+echo "---[ example to parent : README.md ]---"
+if [ -n "${PC_IGNORE_README_EXAMPLE}" ]
+then
+  echo "  ! ignored"
+else
+  [ "${pCopyReadmeExample:0:1}" == "y" ] && doCopyReadmeExample
+  [ "${pCopyReadmeExample:0:1}" == "y" ] || echo "  ! skiped"
 fi

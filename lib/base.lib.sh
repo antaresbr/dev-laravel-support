@@ -109,8 +109,8 @@ function supLoadEnvsAndLibs() {
 
   wsSourceFile "${SUPP_DIR}/env/${SUPP_DB_DRIVER}-${SERVER_ENVIRONMENT}-env"
 
-  [ "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)" != "{{DB_USERNAME}}" ] || ${SUPP_DB_DRIVER^^}_ROOT_USERNAME="${DB_USERNAME}"
-  [ "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)" != "{{DB_PASSWORD}}" ] || ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD="${DB_PASSWORD}"
+  [ "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)" != "{{DB_USERNAME}}" ] || envVarSet "${SUPP_DB_DRIVER^^}_ROOT_USERNAME" "$(envVarGet "DB${SUPP_AFFIX}_USERNAME")"
+  [ "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)" != "{{DB_PASSWORD}}" ] || envVarSet "${SUPP_DB_DRIVER^^}_ROOT_PASSWORD" "$(envVarGet "DB${SUPP_AFFIX}_PASSWORD")"
 
   [ -z "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)" ] && supError "${_fn}" "${SUPP_DB_DRIVER^^}_ROOT_USERNAME not defined"
   [ -z "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)" ] && supError "${_fn}" "${SUPP_DB_DRIVER^^}_ROOT_PASSWORD not defined"

@@ -30,11 +30,11 @@ echo ""
 [ -n "${pAppPort}" ] || envVarRead "APP port" "pAppPort" "default:7001|required" ""
 [ -n "${pEnableAsync}" ] || envVarRead "Enable async jobs app" "pEnableAsync" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
 
-defRedisForwardPort="7004"
+defRedisForwardPort="7002"
 [ -n "${pEnableRedis}" ] || envVarRead "Enable REDIS" "pEnableRedis" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
 [ "${pEnableRedis:0:1}" == "n" ] || [ -n "${pRedisForwardPort}" ] || envVarRead "REDIS forward port" "pRedisForwardPort" "default:${defRedisForwardPort}|required"
 
-defMemcachedForwardPort="7004"
+defMemcachedForwardPort="7003"
 [ -n "${pEnableMemcached}" ] || envVarRead "Enable Memcached" "pEnableMemcached" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
 [ "${pEnableMemcached:0:1}" == "n" ] || [ -n "${pMemcacedForwardPort}" ] || envVarRead "Memcached forward port" "pMemcacedForwardPort" "default:${defMemcachedForwardPort}|required"
 
@@ -49,17 +49,17 @@ then
   [ -n "${pMysqlForwardPort}" ] || envVarRead "MySQL forward port" "pMysqlForwardPort" "default:${defMysqlForwardPort}|required"
 fi
 
-defPostgresVersion="16"
-defPostgresRootUsername="postgres"
-defPostgresRootPassword="secret"
-defPostgresForwardPort="7005"
-[ -n "${pEnablePostgres}" ] || envVarRead "Enable Postgres" "pEnablePostgres" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
-if [ "${pEnablePostgres:0:1}" == "y" ]
+defPgsqlVersion="16"
+defPgsqlRootUsername="postgres"
+defPgsqlRootPassword="secret"
+defPgsqlForwardPort="7005"
+[ -n "${pEnablePgsql}" ] || envVarRead "Enable Postgres" "pEnablePgsql" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+if [ "${pEnablePgsql:0:1}" == "y" ]
 then
-  [ -n "${pPostgresVersion}" ] || envVarRead "Postgres version" "pPostgresVersion" "default:${defPostgresVersion}|required"
-  [ -n "${pPostgresRootUsername}" ] || envVarRead "Postgres root user" "pPostgresRootUsername" "default:${defPostgresRootUsername}|required"
-  [ -n "${pPostgresRootPassword}" ] || envVarRead "Postgres root password" "pPostgresRootPassword" "default:${defPostgresRootPassword}|required"
-  [ -n "${pPostgresForwardPort}" ] || envVarRead "Postgres forward port" "pPostgresForwardPort" "default:${defPostgresForwardPort}|required"
+  [ -n "${pPgsqlVersion}" ] || envVarRead "Postgres version" "pPgsqlVersion" "default:${defPgsqlVersion}|required"
+  [ -n "${pPgsqlRootUsername}" ] || envVarRead "Postgres root user" "pPgsqlRootUsername" "default:${defPgsqlRootUsername}|required"
+  [ -n "${pPgsqlRootPassword}" ] || envVarRead "Postgres root password" "pPgsqlRootPassword" "default:${defPgsqlRootPassword}|required"
+  [ -n "${pPgsqlForwardPort}" ] || envVarRead "Postgres forward port" "pPgsqlForwardPort" "default:${defPgsqlForwardPort}|required"
 fi
 
 echo ""
@@ -67,7 +67,6 @@ echo "---[ parameters ]---"
 echo ""
 echo "ENVIRONMENT : ${pEnvironment}"
 echo ""
-echo "pEnableSail          : ${pEnableSail}"
 echo "pSailProject         : ${pSailProject}"
 echo "pSailSubproject      : ${pSailSubproject}"
 echo "pUbuntuCodname       : ${pUbuntuCodname}"
@@ -92,13 +91,13 @@ then
   echo "pMysqlRootPassword   : ${pMysqlRootPassword}"
   echo "pMysqlForwardPort    : ${pMysqlForwardPort}"
 fi
-echo "pEnablePostgres        : ${pEnablePostgres}"
-if [ "${pEnablePostgres:0:1}" == "y" ]
+echo "pEnablePgsql         : ${pEnablePgsql}"
+if [ "${pEnablePgsql:0:1}" == "y" ]
 then
-  echo "pPostgresVersion       : ${pPostgresVersion}"
-  echo "pPostgresRootUsername  : ${pPostgresRootUsername}"
-  echo "pPostgresRootPassword  : ${pPostgresRootPassword}"
-  echo "pPostgresForwardPort   : ${pPostgresForwardPort}"
+  echo "pPgsqlVersion        : ${pPgsqlVersion}"
+  echo "pPgsqlRootUsername   : ${pPgsqlRootUsername}"
+  echo "pPgsqlRootPassword   : ${pPgsqlRootPassword}"
+  echo "pPgsqlForwardPort    : ${pPgsqlForwardPort}"
 fi
 echo ""
 
@@ -113,7 +112,6 @@ then
   then
     echo "\
 #!/bin/bash
-pEnableSail=\"${pEnableSail}\"
 pSailProject=\"${pSailProject}\"
 pSailSubproject=\"${pSailSubproject}\"
 pUbuntuCodname=\"${pUbuntuCodname}\"
@@ -129,11 +127,11 @@ pEnableMysql=\"${pEnableMysql}\"
 pMysqlVersion=\"${pMysqlVersion}\"
 pMysqlRootPassword=\"${pMysqlRootPassword}\"
 pMysqlForwardPort=\"${pMysqlForwardPort}\"
-pEnablePostgres=\"${pEnablePostgres}\"
-pPostgresVersion=\"${pPostgresVersion}\"
-pPostgresRootUsername=\"${pPostgresRootUsername}\"
-pPostgresRootPassword=\"${pPostgresRootPassword}\"
-pPostgresForwardPort=\"${pPostgresForwardPort}\"
+pEnablePgsql=\"${pEnablePgsql}\"
+pPgsqlVersion=\"${pPgsqlVersion}\"
+pPgsqlRootUsername=\"${pPgsqlRootUsername}\"
+pPgsqlRootPassword=\"${pPgsqlRootPassword}\"
+pPgsqlForwardPort=\"${pPgsqlForwardPort}\"
 " > "${SCRIPT_DIR}/setup.local.env"
   fi
 fi
@@ -142,7 +140,7 @@ fi
 [ "${pEnableRedis:0:1}" == "y" ] && pEnableRedis="true" || pEnableRedis="false"
 [ "${pEnableMemcached:0:1}" == "y" ] && pEnableMemcached="true" || pEnableMemcached="false"
 [ "${pEnableMysql:0:1}" == "y" ] && pEnableMysql="true" || pEnableMysql="false"
-[ "${pEnablePostgres:0:1}" == "y" ] && pEnablePostgres="true" || pEnablePostgres="false"
+[ "${pEnablePgsql:0:1}" == "y" ] && pEnablePgsql="true" || pEnablePgsql="false"
 
 WS_TEMPLATE_FILE_VARS="\
 SAIL_PROJECT=${pSailProject}
@@ -159,22 +157,28 @@ MEMCACHED_FORWARD_PORT=${pMemcacedForwardPort:-$defMemcachedForwardPort}
 SAIL_MYSQL=${pEnableMysql}
 MYSQL_VERSION=${pMysqlVersion:-$defMysqlVersion}
 MYSQL_ROOT_PASSWORD=${pMysqlRootPassword:-$defMysqlRootPassword}
-MYSQL_FORWARD_PORT=${pMysqlForwardPort:$defMysqlForwardPort}
-SAIL_POSTGRES=${pEnablePostgres}
-POSTGRES_VERSION=${pPostgresVersion:-$defPostgresVersion}
-POSTGRES_ROOT_USERNAME=${pPostgresRootUsername:-$defPostgresRootUsername}
-POSTGRES_ROOT_PASSWORD=${pPostgresRootPassword:-$defPostgresRootPassword}
-POSTGRES_FORWARD_PORT=${pPostgresForwardPort:-$defPostgresForwardPort}
+MYSQL_FORWARD_PORT=${pMysqlForwardPort:-$defMysqlForwardPort}
+SAIL_PGSQL=${pEnablePgsql}
+PGSQL_VERSION=${pPgsqlVersion:-$defPgsqlVersion}
+PGSQL_ROOT_USERNAME=${pPgsqlRootUsername:-$defPgsqlRootUsername}
+PGSQL_ROOT_PASSWORD=${pPgsqlRootPassword:-$defPgsqlRootPassword}
+PGSQL_FORWARD_PORT=${pPgsqlForwardPort:-$defPgsqlForwardPort}
 "
 
 #-- sail
 
 sailSetup
 
-#-- template
+#-- files
 
 wsTemplateFile "BUILD-INFO.json" ".example/BUILD-INFO.json.example"
 wsTemplateFile "ENVIRONMENT.json" ".example/ENVIRONMENT.json.example"
+
+if [ -d "storage" ]
+then
+  wsCertifyPath "storage/dump"
+  wsCopyFileIfNotExists "support/base/.example/app/storage/dump/.gitignore.example" "storage/dump/.gitignore"
+fi
 
 #-- build
 

@@ -211,7 +211,7 @@ function doCopySailExample() {
 
 echo ""
 echo ": .bootstrap.sh"
-wsCopyFileIfNotExists "${BASE_DIR}/base/.example/support/.bootstrap.sh" "${BASE_DIR}/../" "644"
+wsCopyFileIfNotExists "${BASE_DIR}/base/.example/support/.bootstrap.sh.example" "${BASE_DIR}/.bootstrap.sh" "644"
 
 echo ""
 echo "---[ env files ]---"

@@ -1,1 +1,6 @@
+/.workspace-lib
 /base
+/git-repo
+/*.sh
+
+!/.bootstrap.sh
