@@ -210,6 +210,10 @@ function doCopySailExample() {
 #-- template and examples
 
 echo ""
+echo ": .bootstrap.sh"
+wsCopyFileIfNotExists "${BASE_DIR}/.example/support/.bootstrap.sh" "${BASE_DIR}/../" "644"
+
+echo ""
 echo "---[ env files ]---"
 doEnvFiles
 

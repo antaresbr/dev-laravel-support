@@ -1,18 +1,11 @@
 #!/bin/bash
 
-[ "$(type -t _bootError)" == "function" ] || function _bootError() {
-  local scriptName="$(basename "$(realpath "$1")")" && shift
-  scriptName="${scriptName%.*}"
-  [ $# -gt 1 ] && [ -n "$1" ] && local prefix=" | $1" && shift
-  echo -e "\n${scriptName}${prefix} | ERROR | $@ \n" && exit 1
-}
-[ "$(type -t _bootSource)" == "function" ] || function _bootSource() {
-  local zCurrentScript="$1" && shift
-  local zFileToSource="$1" && shift
-  [ -f "${zFileToSource}" ] || _bootError "${zCurrentScript}" "_bootSource" "File not found: ${zFileToSource}"
-  source "${zFileToSource}" || _bootError "${zCurrentScript}" "_bootSource" "Fail to source file: ${zFileToSource}"
-}
-_bootSource "${BASH_SOURCE[0]}" "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")/lib/base.lib.sh"
+_bootstrap="$(dirname "$(realpath -s "${BASH_SOURCE[0]}")")/.bootstrap.sh"
+while [ ! -f "${_bootstrap}" ]; do
+  _bootstrap="$(dirname "$(dirname "${_bootstrap}")")/$(basename "${_bootstrap}")"; [ -f "${_bootstrap}" ] && break
+  [ "$(dirname "${_bootstrap}")" != "/" ] || { echo -e "\n${BASH_SOURCE[0]} | File .bootstrap.sh not found\n"; exit 1; }
+done
+source "${_bootstrap}" || { echo -e "\n${BASH_SOURCE[0]} | Fail to source file: ${_bootstrap}\n"; exit 1; }
 
 #-- init parameters
 pOwner=""

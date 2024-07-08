@@ -86,6 +86,10 @@ function doCopyGitignoreExample() {
 #-- template and examples
 
 echo ""
+echo ": .bootstrap.sh"
+wsCopyFileIfNotExists "${BASE_DIR}/.example/support/.bootstrap.sh" "${BASE_DIR}/../" "644"
+
+echo ""
 echo "---[ example to parent : post-clone ]---"
 if [ -n "${PC_IGNORE_POST_CLONE_EXAMPLE}" ]
 then
