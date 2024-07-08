@@ -189,16 +189,16 @@ sail/sail up -d
 echo ""
 echo "Waiting container 'app'"
 
+sailUpTries=0
 sailUp=""
 while [ -z "${sailUp}" ]
 do
-  sailAppExec ls > /dev/null
-  if [ $? -eq 0 ]
-  then
-    sailUp="TRUE"
-  else
-    sleep 3
-  fi
+  ((sailUpTries+=1))
+  echo "  + try : ${sailUpTries}"
+  sailAppExec "CHECK_SUCCESS=false" curl 127.0.0.1:81 &> /dev/null
+  [ $? -eq 0 ] && sailUp="TRUE" && break
+  [ "${sailUpTries}" -ge 5 ] && wsError "Failure waiting for container app"
+  sleep 3
 done
 
 if [ "${sailUp}" == "TRUE" ]

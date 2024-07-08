@@ -70,6 +70,12 @@ RUN chmod +x /usr/local/bin/start-container.sh \
     && rm /etc/nginx/sites-enabled/default \
     && rm /etc/nginx/sites-available/default
 
+#-- probe
+RUN mkdir -p /var/www/probe
+COPY probe.index.php /var/www/probe/index.php
+RUN chown -R sail:sail /var/www/probe
+
 EXPOSE 80
+EXPOSE 81
 
 ENTRYPOINT ["start-container.sh"]
