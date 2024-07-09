@@ -14,6 +14,8 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TZ=UTC
 ENV PHP_VERSION=${PHP_VERSION}
 
+LABEL devcontainer.metadata="[{ \"remoteUser\": \"${WWWUSER}\" }]"
+
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update \
@@ -56,8 +58,6 @@ RUN groupadd --force -g $WWWGROUP sail
 RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $WWWUSER sail \
     && usermod -aG sudo sail \
     && usermod --password '$6$g/d4Kgna99v5RyE.$I/Pz3TgvRKBQIn7G2EozzPbhjVHj4GvHPryp5gyRkTUN7/u2piwiDZxc/JCBW63/0CnZtSBezhWgrNFqUATkP1' sail
-
-LABEL devcontainer.metadata="[{ \"remoteUser\": \"$WWWGROUP\" }]"
 
 COPY php.ini /etc/php/${PHP_VERSION}/cli/conf.d/99-sail.ini
 COPY resources/setup-container.sh /usr/local/bin/
