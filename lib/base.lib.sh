@@ -58,11 +58,19 @@ function supWarn() {
 
 
 function supMakeDir() {
-  local zDir="$1"
+  local zDir="$1" && shift
+  local zMode="$1" && shift
+
   if [ -n "${zDir}" ]
   then
-    [ ! -d "${zDir}" ] && sudo mkdir -p "${zDir}"
-    sudo chmod 775 "${zDir}"
+    if [ ! -d "${zDir}" ]
+    then
+      sudo mkdir -p "${zDir}"
+      [ -n "${zMode}" ] || zMode="775"
+      sudo chmod "${zMode}" "${zDir}"
+    else
+      [ -z "${zMode}" ] || sudo chmod "${zMode}" "${zDir}"
+    fi
   fi
 }
 
