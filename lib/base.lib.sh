@@ -104,7 +104,7 @@ function supSetEnvFileNames() {
 
 
 function supLoadEnvsAndLibs() {
-  local _fn="supLoadEnvs"
+  local _fn="supLoadEnvsAndLibs"
   [ -n "${SERVER_ENVIRONMENT}" ] || supError "${_fn}" "SERVER_ENVIRONMENT not defined"
 
   supSetEnvFileNames
@@ -113,7 +113,7 @@ function supLoadEnvsAndLibs() {
 
   [ -n "${SUPP_AFFIX}" ] && SUPP_DB_DRIVER="$(envVarGet "DB${SUPP_AFFIX}_DRIVER")"
   [ -z "${SUPP_AFFIX}" ] && SUPP_DB_DRIVER="${DB_DRIVER}"
-  [ -n "${SUPP_DB_DRIVER}" ] || supError "Impossible to get SUPP_DB_DRIVER <DB${SUPP_AFFIX}_DRIVER>"
+  [ -n "${SUPP_DB_DRIVER}" ] || supError "${_fn}" "Impossible to get SUPP_DB_DRIVER <DB${SUPP_AFFIX}_DRIVER>"
 
   wsSourceFile "${SUPP_DIR}/env/${SUPP_DB_DRIVER}-${SERVER_ENVIRONMENT}-env"
 
@@ -144,6 +144,60 @@ function supLoadEnvsAndLibs() {
     echo ""
     echo " SUPP_DB_DRIVER      : ${SUPP_DB_DRIVER}"
     echo " SUPP_DB_CONNECTION  : ${SUPP_DB_CONNECTION}"
+    echo " SUPP_DB_HOST        : ${SUPP_DB_HOST}"
+    echo " SUPP_DB_PORT        : ${SUPP_DB_PORT}"
+    echo " SUPP_DB_DATABASE    : ${SUPP_DB_DATABASE}"
+    echo " SUPP_DB_USERNAME    : ${SUPP_DB_USERNAME}"
+    if [ "${SERVER_ENVIRONMENT}" == "${PRODUCTION_ENVIRONMENT}" ]
+    then
+      echo " SUPP_DB_PASSWORD    : ******"
+    else
+      echo " SUPP_DB_PASSWORD    : ${SUPP_DB_PASSWORD}"
+      echo ""
+      echo " ${SUPP_DB_DRIVER^^}_ROOT_USERNAME : $(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)"
+      echo " ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD : $(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)"
+    fi
+    if [ "${SERVER_ENVIRONMENT}" == "${PRODUCTION_ENVIRONMENT}" ]
+    then
+      echo ""
+      echo " ** PRODUCTION ENVIRONMENT **"
+    fi
+    echo ""
+  fi
+}
+
+
+function supLoadDriver() {
+  local _fn="supLoadDriver"
+  [ -n "${SERVER_ENVIRONMENT}" ] || supError "${_fn}" "SERVER_ENVIRONMENT not defined"
+  [ -n "${SUPP_DB_DRIVER}" ] || supError "${_fn}" "SUPP_DB_DRIVER not defined"
+
+  SUPP_DB_HOST="${pHost}"
+  SUPP_DB_PORT="${pPort}"
+  SUPP_DB_DATABASE="${pDatabase}"
+  SUPP_DB_USERNAME="${pUser}"
+  SUPP_DB_PASSWORD="${pPassword}"
+
+  [ -n "${SUPP_DB_DRIVER}" ] || supError "${_fn}" "SUPP_DB_DRIVER not defined"
+  [ -n "${SUPP_DB_PORT}" ] || supError "${_fn}" "SUPP_DB_PORT not defined"
+  [ -n "${SUPP_DB_DATABASE}" ] || supError "${_fn}" "SUPP_DB_DATABASE not defined"
+  [ -n "${SUPP_DB_USERNAME}" ] || supError "${_fn}" "SUPP_DB_USERNAME not defined"
+  [ -n "${SUPP_DB_PASSWORD}" ] || supError "${_fn}" "SUPP_DB_PASSWORD not defined"
+
+  wsSourceFile "${SUPP_DIR}/env/${SUPP_DB_DRIVER}-${SERVER_ENVIRONMENT}-env"
+
+  [ "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)" != "{{DB_USERNAME}}" ] || envVarSet "${SUPP_DB_DRIVER^^}_ROOT_USERNAME" "${SUPP_DB_USERNAME}"
+  [ "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)" != "{{DB_PASSWORD}}" ] || envVarSet "${SUPP_DB_DRIVER^^}_ROOT_PASSWORD" "${SUPP_DB_USERNAME}"
+
+  [ -z "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_USERNAME)" ] && supError "${_fn}" "${SUPP_DB_DRIVER^^}_ROOT_USERNAME not defined"
+  [ -z "$(envVarGet ${SUPP_DB_DRIVER^^}_ROOT_PASSWORD)" ] && supError "${_fn}" "${SUPP_DB_DRIVER^^}_ROOT_PASSWORD not defined"
+  
+  wsSourceFile "${SUPP_BASE_LIB_DIR}/${SUPP_DB_DRIVER}.lib.sh"
+
+  if [ "${SUPP_SHOW_DB_INFOS^^}" != "FALSE" ] && [ -z "${pNoHeaderInfos}" ]
+  then
+    echo ""
+    echo " SUPP_DB_DRIVER      : ${SUPP_DB_DRIVER}"
     echo " SUPP_DB_HOST        : ${SUPP_DB_HOST}"
     echo " SUPP_DB_PORT        : ${SUPP_DB_PORT}"
     echo " SUPP_DB_DATABASE    : ${SUPP_DB_DATABASE}"
