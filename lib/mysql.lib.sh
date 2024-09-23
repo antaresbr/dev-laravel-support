@@ -70,7 +70,7 @@ function mysql_abort_if_exists_in_production() {
 
 
 function mysql_init_db() {
-  echo "craeting database: ${SUPP_DB_HOST}.${SUPP_DB_DATABASE}"
+  echo "creating database: ${SUPP_DB_DATABASE}@${SUPP_DB_HOST}"
 
   mysql_root_credentials
   mysql_exec_file_prepare

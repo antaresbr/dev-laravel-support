@@ -70,7 +70,7 @@ function pgsql_abort_if_exists_in_production() {
 
 
 function pgsql_init_db() {
-  echo "craeting database: ${SUPP_DB_HOST}.${SUPP_DB_DATABASE}"
+  echo "creating database: ${SUPP_DB_DATABASE}@${SUPP_DB_HOST}"
 
   pgsql_root_credentials
   pgsql_exec_file_prepare
