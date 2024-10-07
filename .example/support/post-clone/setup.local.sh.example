@@ -12,25 +12,25 @@ echo "---| post-clone/$(basename "${BASH_SOURCE[0]}")"
 
 #-- parameters
 
-pclLoadSavedParams
+pclLoadDefaultAndSavedParams
 
 if [ -z "${pAppName}" ]
 then
   echo ""
-  envVarRead "APP name" "pAppName" "default:$(basename "$(dirname "$(realpath "${BASE_DIR}")")")|required|lower-case" ""
+  envVarRead "APP name" "pAppName" "default:$(wsCoalesce "${default_pAppName}" "$(basename "$(dirname "$(realpath "${BASE_DIR}")")")")|required|lower-case" ""
 fi
 
 echo ""
-[ -n "${pAppEnvDir}" ]      || envVarRead "env/${pEnvironment}-env : APP_ENV_DIR" "pAppEnvDir" "" ""
-[ -n "${pUrlProto}" ]       || envVarRead "env/${pEnvironment}-env : URL_PROTO" "pUrlProto" "default:http|required|lower-case|hide-values" "http|https"
-[ -n "${pUrlDomain}" ]      || envVarRead "env/${pEnvironment}-env : URL_DOMAIN" "pUrlDomain" "default:${pAppName}.${pEnvironment}|required|lower-case" ""
+[ -n "${pAppEnvDir}" ]      || envVarRead "env/${pEnvironment}-env : APP_ENV_DIR" "pAppEnvDir" "default:${default_pAppEnvDir}" ""
+[ -n "${pUrlProto}" ]       || envVarRead "env/${pEnvironment}-env : URL_PROTO" "pUrlProto" "default:$(wsCoalesce "${default_pUrlProto}" "http")|required|lower-case|hide-values" "http|https"
+[ -n "${pUrlDomain}" ]      || envVarRead "env/${pEnvironment}-env : URL_DOMAIN" "pUrlDomain" "default:$(wsCoalesce "${default_pUrlDomain}" "${pAppName}.${pEnvironment}")|required|lower-case" ""
 
 echo ""
-[ -n "${pMysqlRootUsername}" ] || envVarRead "MYSQL_ROOT_USERNAME" "pMysqlRootUsername" "default:{{DB_USERNAME}}" ""
-[ -n "${pMysqlRootPassword}" ] || envVarRead "MYSQL_ROOT_PASSWORD" "pMysqlRootPassword" "default:{{DB_PASSWORD}}" ""
+[ -n "${pMysqlRootUsername}" ] || envVarRead "MYSQL_ROOT_USERNAME" "pMysqlRootUsername" "default:$(wsCoalesce "${default_pMysqlRootUsername}" "{{DB_USERNAME}}")" ""
+[ -n "${pMysqlRootPassword}" ] || envVarRead "MYSQL_ROOT_PASSWORD" "pMysqlRootPassword" "default:$(wsCoalesce "${default_pMysqlRootPassword}" "{{DB_PASSWORD}}")" ""
 echo ""
-[ -n "${pPgsqlRootUsername}" ] || envVarRead "PGSQL_ROOT_USERNAME" "pPgsqlRootUsername" "default:{{DB_USERNAME}}" ""
-[ -n "${pPgsqlRootPassword}" ] || envVarRead "PGSQL_ROOT_PASSWORD" "pPgsqlRootPassword" "default:{{DB_PASSWORD}}" ""
+[ -n "${pPgsqlRootUsername}" ] || envVarRead "PGSQL_ROOT_USERNAME" "pPgsqlRootUsername" "default:$(wsCoalesce "${default_pPgsqlRootUsername}" "{{DB_USERNAME}}")" ""
+[ -n "${pPgsqlRootPassword}" ] || envVarRead "PGSQL_ROOT_PASSWORD" "pPgsqlRootPassword" "default:$(wsCoalesce "${default_pPgsqlRootPassword}" "{{DB_PASSWORD}}")" ""
 
 [ "${pAppEnvDir}" = ":none:" ] && pAppEnvDir=""
 
@@ -38,35 +38,35 @@ echo ""
 if [ -z "${pLinksToBaseBaseScripts}" ]
 then
   echo""
-  envVarRead "Create links to base scripts?" "pLinksToBaseBaseScripts" "default:yes|lower-case|hide-values" "y|yes|n|no"
+  envVarRead "Create links to base scripts?" "pLinksToBaseBaseScripts" "default:$(wsCoalesce "${default_pLinksToBaseBaseScripts}" "yes")|lower-case|hide-values" "y|yes|n|no"
 fi
 
 [ -z "${PC_IGNORE_GIT_REPO_EXAMPLE}" ] || pCopyGitRepoExample=no
 if [ -z "${pCopyGitRepoExample}" ]
 then
   echo""
-  envVarRead "Copy <git-repo> example to parent project?" "pCopyGitRepoExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+  envVarRead "Copy <git-repo> example to parent project?" "pCopyGitRepoExample" "default:$(wsCoalesce "${default_pCopyGitRepoExample}" "yes")|lower-case|hide-values" "y|yes|n|no"
 fi
 
 [ -z "${PC_IGNORE_POST_CLONE_EXAMPLE}" ] || pCopyPostCloneExample=no
 if [ -z "${pCopyPostCloneExample}" ]
 then
   echo""
-  envVarRead "Copy <post-clone> example to parent project?" "pCopyPostCloneExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+  envVarRead "Copy <post-clone> example to parent project?" "pCopyPostCloneExample" "default:$(wsCoalesce "${default_pCopyPostCloneExample}" "yes")|lower-case|hide-values" "y|yes|n|no"
 fi
 
 [ -z "${PC_IGNORE_DOCKER_EXAMPLE}" ] || pCopyDockerExample=no
 if [ -z "${pCopyDockerExample}" ]
 then
   echo""
-  envVarRead "Copy <docker> example to parent project?" "pCopyDockerExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+  envVarRead "Copy <docker> example to parent project?" "pCopyDockerExample" "default:$(wsCoalesce "${default_pCopyDockerExample}" "yes")|lower-case|hide-values" "y|yes|n|no"
 fi
 
 [ -z "${PC_IGNORE_SAIL_EXAMPLE}" ] || pCopySailExample=no
 if [ -z "${pCopySailExample}" ]
 then
   echo""
-  envVarRead "Copy <sail> example to parent project?" "pCopySailExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+  envVarRead "Copy <sail> example to parent project?" "pCopySailExample" "default:$(wsCoalesce "${default_pCopySailExample}" "yes")|lower-case|hide-values" "y|yes|n|no"
 fi
 
 echo ""
@@ -121,6 +121,12 @@ pCopySailExample=\"${pCopySailExample}\"
 fi
 
 #-- actions
+
+function doLinkToBootstrap() {
+  local target=""
+  target="base/lib/.bootstrap.sh" && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
+}
+
 
 function doEnvFiles() {
   wsCertifyPath "$(realpath "${BASE_DIR}/env")"
@@ -210,8 +216,8 @@ function doCopySailExample() {
 #-- template and examples
 
 echo ""
-echo ": .bootstrap.sh"
-wsCopyFileIfNotExists "${BASE_DIR}/base/.example/support/.bootstrap.sh.example" "${BASE_DIR}/.bootstrap.sh" "644"
+echo "---[ .bootstrap.sh ]---"
+doLinkToBootstrap
 
 echo ""
 echo "---[ env files ]---"

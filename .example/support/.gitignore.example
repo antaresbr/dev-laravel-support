@@ -1,6 +1,6 @@
 /.workspace-lib
 /base
+
+/.env
 /git-repo
 /*.sh
-
-!/.bootstrap.sh

@@ -25,7 +25,7 @@ fi
 if [ -z "${pCopyGitRepoExample}" ]
 then
   echo""
-  envVarRead "Copy <git-repo> example to parent project?" "pCopyGitRepoExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
+  envVarRead "Copy <.git-repo> example to parent project?" "pCopyGitRepoExample" "default:yes|lower-case|hide-values" "y|yes|n|no"
 fi
 
 [ -z "${PC_IGNORE_GITIGNORE_EXAMPLE}" ] || pCopyGitignoreExample=no
@@ -98,10 +98,6 @@ function doCopyReadmeExample() {
 }
 
 #-- template and examples
-
-echo ""
-echo ": .bootstrap.sh"
-wsCopyFileIfNotExists "${BASE_DIR}/.example/support/.bootstrap.sh.example" "${BASE_DIR}/../.bootstrap.sh" "644"
 
 echo ""
 echo "---[ example to parent : post-clone ]---"

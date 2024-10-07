@@ -16,32 +16,32 @@ function localSailSetup() {
 
 #-- parameters
 
-pclLoadSavedParams
+pclLoadDefaultAndSavedParams
 
 echo ""
 
-[ -n "${pSailProject}" ] || envVarRead "Sail project" "pSailProject" "required|lower-case" ""
-[ -n "${pSailSubproject}" ] || envVarRead "Sail subproject" "pSailSubproject" "default:$(basename "$(realpath "${BASE_DIR}")")|required|lower-case" ""
+[ -n "${pSailProject}" ] || envVarRead "Sail project" "pSailProject" "default:${default_pSailProject}|required|lower-case" ""
+[ -n "${pSailSubproject}" ] || envVarRead "Sail subproject" "pSailSubproject" "default:$(wsCoalesce "${default_pSailSubproject}" "$(basename "$(realpath "${BASE_DIR}")")")|required|lower-case" ""
 
-[ -n "${pUbuntuCodname}" ] || envVarRead "Ubuntu codename" "pUbuntuCodname" "default:jammy|required|lower-case" ""
-[ -n "${pPhpVersion}" ] || envVarRead "PHP version" "pPhpVersion" "default:8.2|required" ""
-[ -n "${pNodeVersion}" ] || envVarRead "Node version" "pNodeVersion" "default:20|required" ""
+[ -n "${pUbuntuCodname}" ] || envVarRead "Ubuntu codename" "pUbuntuCodname" "default:$(wsCoalesce "${default_pUbuntuCodname}" "jammy")|required|lower-case" ""
+[ -n "${pPhpVersion}" ] || envVarRead "PHP version" "pPhpVersion" "default:$(wsCoalesce "${default_pPhpVersion}" "8.2")|required" ""
+[ -n "${pNodeVersion}" ] || envVarRead "Node version" "pNodeVersion" "default:$(wsCoalesce "${default_pNodeVersion}" "20")|required" ""
 
-[ -n "${pAppPort}" ] || envVarRead "APP port" "pAppPort" "default:7001|required" ""
-[ -n "${pEnableAsync}" ] || envVarRead "Enable async jobs app" "pEnableAsync" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+[ -n "${pAppPort}" ] || envVarRead "APP port" "pAppPort" "default:$(wsCoalesce "${default_pAppPort}" "7001")|required" ""
+[ -n "${pEnableAsync}" ] || envVarRead "Enable async jobs app" "pEnableAsync" "default:$(wsCoalesce "${default_pEnableAsync}" "yes")|required|lower-case|hide-values" "y|yes|n|no"
 
-defRedisForwardPort="7002"
-[ -n "${pEnableRedis}" ] || envVarRead "Enable REDIS" "pEnableRedis" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+defRedisForwardPort=$(wsCoalesce "${default_pRedisForwardPort}" "7002")
+[ -n "${pEnableRedis}" ] || envVarRead "Enable REDIS" "pEnableRedis" "default:$(wsCoalesce "${default_pEnableRedis}" "yes")|required|lower-case|hide-values" "y|yes|n|no"
 [ "${pEnableRedis:0:1}" == "n" ] || [ -n "${pRedisForwardPort}" ] || envVarRead "REDIS forward port" "pRedisForwardPort" "default:${defRedisForwardPort}|required"
 
-defMemcachedForwardPort="7003"
-[ -n "${pEnableMemcached}" ] || envVarRead "Enable Memcached" "pEnableMemcached" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+defMemcachedForwardPort=$(wsCoalesce "${default_pMemcacedForwardPort}" "7003")
+[ -n "${pEnableMemcached}" ] || envVarRead "Enable Memcached" "pEnableMemcached" "default:$(wsCoalesce "${default_pEnableMemcached}" "yes")|required|lower-case|hide-values" "y|yes|n|no"
 [ "${pEnableMemcached:0:1}" == "n" ] || [ -n "${pMemcacedForwardPort}" ] || envVarRead "Memcached forward port" "pMemcacedForwardPort" "default:${defMemcachedForwardPort}|required"
 
-defMysqlVersion="8.0"
-defMysqlRootPassword="secret"
-defMysqlForwardPort="7004"
-[ -n "${pEnableMysql}" ] || envVarRead "Enable MySQL" "pEnableMysql" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+defMysqlVersion=$(wsCoalesce "${default_pMysqlVersion}" "8.0")
+defMysqlRootPassword=$(wsCoalesce "${default_pMysqlRootPassword}" "secret")
+defMysqlForwardPort=$(wsCoalesce "${default_pMysqlForwardPort}" "7004")
+[ -n "${pEnableMysql}" ] || envVarRead "Enable MySQL" "pEnableMysql" "default:$(wsCoalesce "${default_pEnableMysql}" "yes")|required|lower-case|hide-values" "y|yes|n|no"
 if [ "${pEnableMysql:0:1}" == "y" ]
 then
   [ -n "${pMysqlVersion}" ] || envVarRead "MySQL version" "pMysqlVersion" "default:${defMysqlVersion}|required"
@@ -49,11 +49,11 @@ then
   [ -n "${pMysqlForwardPort}" ] || envVarRead "MySQL forward port" "pMysqlForwardPort" "default:${defMysqlForwardPort}|required"
 fi
 
-defPgsqlVersion="16"
-defPgsqlRootUsername="postgres"
-defPgsqlRootPassword="secret"
-defPgsqlForwardPort="7005"
-[ -n "${pEnablePgsql}" ] || envVarRead "Enable Postgres" "pEnablePgsql" "default:yes|required|lower-case|hide-values" "y|yes|n|no"
+defPgsqlVersion=$(wsCoalesce "${default_pPgsqlVersion}" "16")
+defPgsqlRootUsername=$(wsCoalesce "${default_pPgsqlRootUsername}" "postgres")
+defPgsqlRootPassword=$(wsCoalesce "${default_pPgsqlRootPassword}" "secret")
+defPgsqlForwardPort=$(wsCoalesce "${default_pPgsqlForwardPort}" "7005")
+[ -n "${pEnablePgsql}" ] || envVarRead "Enable Postgres" "pEnablePgsql" "default:$(wsCoalesce "${default_pEnablePgsql}" "yes")|required|lower-case|hide-values" "y|yes|n|no"
 if [ "${pEnablePgsql:0:1}" == "y" ]
 then
   [ -n "${pPgsqlVersion}" ] || envVarRead "Postgres version" "pPgsqlVersion" "default:${defPgsqlVersion}|required"
