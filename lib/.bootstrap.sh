@@ -12,5 +12,5 @@
   [ -f "${zFileToSource}" ] || _bootError "${zCurrentScript}" "_bootSource" "File not found: ${zFileToSource}"
   source "${zFileToSource}" || _bootError "${zCurrentScript}" "_bootSource" "Fail to source file: ${zFileToSource}"
 }
-[ -n "${BOOTSTRAP_DIR}" ] || BOOTSTRAP_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-[ -n "${SUPP_BASE_LIB_SH}" ] || _bootSource "${BASH_SOURCE[0]}" "${BOOTSTRAP_DIR}/base.lib.sh"
+[ -n "${BOOTSTRAP_DIR}" ] || BOOTSTRAP_DIR="$(dirname "$(realpath -s "${BASH_SOURCE[0]}")")"
+[ -n "${SUPP_BASE_LIB_SH}" ] || _bootSource "${BASH_SOURCE[0]}" "${BOOTSTRAP_DIR}/base/lib/base.lib.sh"
