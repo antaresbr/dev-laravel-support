@@ -1,10 +1,13 @@
 #!/bin/bash
 
+[ "${BASH_SOURCE[0]}" -ef "$0" ] && echo "$(basename "$0") | ERROR: This file must be sourced" && exit 1
+[ "$(type -t wsError)" == "function" ] || { echo "$(basename "$0") | ERROR: Function wsError not defined"; exit 1; }
+
 echo ""
 echo "---[ $(dirname "$(realpath "${SCRIPT_DIR}")") ]---"
 echo "---| post-clone/$(basename "${BASH_SOURCE[0]}")"
 
-[ -z "${WORKSPACE_BASE_LIB_SH}" ] && echo -e "post-clone/setup-local | ERROR | WORKSPACE_BASE_LIB_SH not defined" && exit 1
+[ -z "${WORKSPACE_BASE_LIB_SH}" ] && wsError "post-clone/setup-local" "WORKSPACE_BASE_LIB_SH not defined"
 [ -z "${POST_CLONE_SETUP_LIB_SH}" ] && wsError "post-clone/setup-local" "POST_CLONE_SETUP_LIB_SH not defined"
 [ -z "${POST_CLONE_LIB_SH}" ] && wsError "post-clone/setup-local" "POST_CLONE_LIB_SH not defined"
 
