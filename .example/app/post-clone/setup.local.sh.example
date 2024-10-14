@@ -67,7 +67,7 @@ fi
 
 defMailpitForwardPort=$(wsCoalesce "${default_pMailpitForwardPort}" "7051")
 [ -n "${pEnableMailpit}" ] || envVarRead "Enable Mailpit" "pEnableMailpit" "default:$(wsCoalesce "${default_pEnableMailpit}" "yes")|required|lower-case|hide-values" "y|yes|n|no"
-[ "${pEnableMailpit:0:1}" == "n" ] || [ -n "${pMailpitForwardPort}" ] || envVarRead "REDIS forward port" "pMailpitForwardPort" "default:${defMailpitForwardPort}|required"
+[ "${pEnableMailpit:0:1}" == "n" ] || [ -n "${pMailpitForwardPort}" ] || envVarRead "Mailpit forward port" "pMailpitForwardPort" "default:${defMailpitForwardPort}|required"
 
 echo ""
 echo "---[ parameters ]---"
@@ -106,10 +106,10 @@ then
   echo "pPgsqlRootPassword   : ${pPgsqlRootPassword}"
   echo "pPgsqlForwardPort    : ${pPgsqlForwardPort}"
 fi
-echo "pEnableMailpit         : ${pEnableMailpit}"
+echo "pEnableMailpit       : ${pEnableMailpit}"
 if [ "${pEnableMailpit:0:1}" == "y" ]
 then
-  echo "pMailpitForwardPort    : ${pMailpitForwardPort}"
+  echo "pMailpitForwardPort  : ${pMailpitForwardPort}"
 fi
 echo ""
 
