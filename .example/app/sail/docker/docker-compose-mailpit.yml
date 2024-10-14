@@ -1,0 +1,22 @@
+services:
+
+    mailpit:
+        image: axllent/mailpit
+        container_name: ${SAIL_SERVICE_MAILPIT}
+        ports:
+            - '${MAILPIT_FORWARD_PORT}:8025'
+        environment:
+            MP_MAX_MESSAGES: 5000
+            MP_DATABASE: /data/mailpit.db
+            MP_SMTP_AUTH_ACCEPT_ANY: 1
+            MP_SMTP_AUTH_ALLOW_INSECURE: 1
+        volumes:
+            - 'sail-mailpit-vol:/data'
+        networks:
+            - sail-project-net
+            - sail-net
+
+volumes:
+    sail-mailpit-vol:
+        driver: local
+        name: ${COMPOSE_PROJECT_NAME}-mailpit-vol

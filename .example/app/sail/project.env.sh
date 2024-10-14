@@ -31,6 +31,10 @@ then
     [ -z "${PGSQL_ROOT_PASSWORD}" ] && sailError "PGSQL_ROOT_PASSWORD not defined"
     [ -z "${PGSQL_FORWARD_PORT}" ] && sailError "PGSQL_FORWARD_PORT not defined"
 fi
+if [ "${SAIL_MAILPIT,,}" == "true" ]
+then
+    [ -z "${MAILPIT_FORWARD_PORT}" ] && sailError "MAILPIT_FORWARD_PORT not defined"
+fi
 
 [ -z "${WWWUSER}" ] && WWWUSER=$(id -u)
 [ -z "${WWWGROUP}" ] && WWWGROUP=$(id -g)
@@ -56,6 +60,8 @@ export PGSQL_ROOT_USERNAME
 export PGSQL_ROOT_PASSWORD
 export PGSQL_FORWARD_PORT
 
+export MAILPIT_FORWARD_PORT
+
 export WWWUSER
 export WWWGROUP
 
@@ -73,6 +79,7 @@ export SAIL_SERVICE_REDIS="${COMPOSE_PROJECT_NAME}-redis"
 export SAIL_SERVICE_MEMCACHED="${COMPOSE_PROJECT_NAME}-memcached"
 export SAIL_SERVICE_MYSQL="${COMPOSE_PROJECT_NAME}-mysql"
 export SAIL_SERVICE_PGSQL="${COMPOSE_PROJECT_NAME}-pgsql"
+export SAIL_SERVICE_MAILPIT="${COMPOSE_PROJECT_NAME}-mailpit"
 
 COMPOSE_CONFIGS="--file docker-compose.yml"
 [ "${SAIL_ASYNC,,}" == "true" ] && COMPOSE_CONFIGS="${COMPOSE_CONFIGS} --file docker-compose-async.yml"
@@ -80,6 +87,7 @@ COMPOSE_CONFIGS="--file docker-compose.yml"
 [ "${SAIL_MEMCACHED,,}" == "true" ] && COMPOSE_CONFIGS="${COMPOSE_CONFIGS} --file docker-compose-memcached.yml"
 [ "${SAIL_MYSQL,,}" == "true" ] && COMPOSE_CONFIGS="${COMPOSE_CONFIGS} --file docker-compose-mysql.yml"
 [ "${SAIL_PGSQL,,}" == "true" ] && COMPOSE_CONFIGS="${COMPOSE_CONFIGS} --file docker-compose-pgsql.yml"
+[ "${SAIL_MAILPIT,,}" == "true" ] && COMPOSE_CONFIGS="${COMPOSE_CONFIGS} --file docker-compose-mailpit.yml"
 export COMPOSE_CONFIGS
 
 fi
