@@ -82,4 +82,5 @@ sudo chmod 775 "${STORAGE_DIR}/app/socket"
 sudo find "${STORAGE_DIR}/framework/" -type d -exec chmod 775 {} \;
 sudo find "${STORAGE_DIR}/framework/" -type f ! -iname .gitignore -exec chmod 664 {} \;
 
+[ -h "${APP_DIR}/public/storage" ] && [ ! -f "${APP_DIR}/public/storage" ] && rm "${APP_DIR}/public/storage"
 [ -e "${APP_DIR}/public/storage" ] || sudo --user="${pOwner}" ln -s "../storage/app/public" "${APP_DIR}/public/storage"
