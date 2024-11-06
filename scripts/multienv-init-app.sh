@@ -100,8 +100,8 @@ wsTemplateFile "${envFile}" "${envExample}" "${envVars}"
 
 if [ "${SERVER_ENVIRONMENT}" == "${PRODUCTION_ENVIRONMENT}" ]
 then
-  dbPass="$(supRandomPassword 32)"
-  adminPass="$(supRandomPassword 20)"
+  dbPass="$(text_random 32)"
+  adminPass="$(text_random 20)"
 
   sed "s/^APP_DEBUG=.*/APP_DEBUG=false/g" -i "${envFile}"
   sed "s/^DB_PASSWORD=.*/DB_PASSWORD=\"${dbPass}\"/g" -i "${envFile}"
