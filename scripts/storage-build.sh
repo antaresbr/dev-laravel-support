@@ -60,6 +60,7 @@ sudo ls -alF > /dev/null
 supMakeDir "${STORAGE_DIR}"
 supMakeDir "${STORAGE_DIR}/app/public"
 supMakeDir "${STORAGE_DIR}/app/socket"
+supMakeDir "${STORAGE_DIR}/app/socket/job"
 supMakeDir "${STORAGE_DIR}/dump"
 supMakeDir "${STORAGE_DIR}/framework/cache/data"
 supMakeDir "${STORAGE_DIR}/framework/sessions"
@@ -77,8 +78,7 @@ then
   sudo chgrp -R ${pWwwGroup} "${STORAGE_DIR}/"
 fi
 
-sudo chmod 775 "${STORAGE_DIR}/app/socket"
-
+sudo find "${STORAGE_DIR}/app/socket/" -type d -exec chmod 775 {} \;
 sudo find "${STORAGE_DIR}/framework/" -type d -exec chmod 775 {} \;
 sudo find "${STORAGE_DIR}/framework/" -type f ! -iname .gitignore -exec chmod 664 {} \;
 
