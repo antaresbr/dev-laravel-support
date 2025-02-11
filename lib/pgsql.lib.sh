@@ -48,6 +48,7 @@ function pgsql_exec_file() {
   cat "${zFile}" \
     | sed "s/\`{{@DB_USER@}}\`/\`${SUPP_DB_USERNAME}\`/g" \
     | sed "s/\`dbadmin\`/\`${SUPP_DB_USERNAME}\`/g" \
+    | sed "s/\`root\`/\`${SUPP_DB_USERNAME}\`/g" \
     | $(pgsql_cmd $@) ${SUPP_DB_DATABASE}
 }
 
@@ -129,6 +130,7 @@ function pgsql_dump_to_file() {
   _ec=$?; [ $_ec -eq 0 ] || return $_ec
 
   sed -i "s/\`dbadmin\`/\`{{@DB_USER@}}\`/g" "${pFile}"
+  sed -i "s/\`root\`/\`{{@DB_USER@}}\`/g" "${pFile}"
   _ec=$?; [ $_ec -eq 0 ] || return $_ec
 }
 

@@ -66,14 +66,17 @@ done
 supLoadEnvsAndLibs
 [ $? -eq 0 ] || supError "Fail on supLoadEnvsAndLibs"
 
+echo ""
 "${SUPP_BASE_SCRIPT_DIR}/db-init.sh" --no-header-infos --init-user --env "${pEnv}" --affix "${pAffix}"
 [ $? -ne 0 ] && exit 1
 
 wsLog "restoring '${pFile}' ..."
 
+echo ""
 ${SUPP_DB_DRIVER}_user_credentials
 [ $? -eq 0 ] || supError "Fail to set user credentials"
 
+echo ""
 ${SUPP_DB_DRIVER}_exec_file "${pFile}"
 [ $? -eq 0 ] || supError "Fail to restore"
 
