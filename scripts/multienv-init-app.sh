@@ -111,7 +111,7 @@ fi
 envFileBackup="${envDir}/backup/$(basename "${envFile}")"
 if [ -f "${envFileBackup}" ]
 then
-  supSourceFile "${envFileBackup}"
+  wsSourceFile "${envFileBackup}"
   sed "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|g" -i "${envFile}"
   sed "s|^APP_URL=.*|APP_URL=${APP_URL}|g" -i "${envFile}"
   sed "s|^DB_PASSWORD=.*|DB_PASSWORD=\"${DB_PASSWORD}\"|g" -i "${envFile}"
