@@ -31,6 +31,8 @@ then
   envVarRead "Sail subproject" "pSailSubproject" "default:$(wsCoalesce "${default_pSailSubproject}" "${defSailSubproject}")|required|lower-case" ""
 fi
 
+[ -n "${pSailUserName}" ] || envVarRead "'sail' username" "pSailUserName" "default:$(wsCoalesce "${default_pSailUserName}" "ubuntu")|required|lower-case" ""
+
 [ -n "${pUbuntuCodname}" ] || envVarRead "Ubuntu codename" "pUbuntuCodname" "default:$(wsCoalesce "${default_pUbuntuCodname}" "noble")|required|lower-case" ""
 [ -n "${pPhpVersion}" ] || envVarRead "PHP version" "pPhpVersion" "default:$(wsCoalesce "${default_pPhpVersion}" "8.4")|required" ""
 [ -n "${pNodeVersion}" ] || envVarRead "Node version" "pNodeVersion" "default:$(wsCoalesce "${default_pNodeVersion}" "22")|required" ""
@@ -81,6 +83,7 @@ echo "ENVIRONMENT : ${pEnvironment}"
 echo ""
 echo "pSailProject         : ${pSailProject}"
 echo "pSailSubproject      : ${pSailSubproject}"
+echo "pSailUserName        : ${pSailUserName}"
 echo "pUbuntuCodname       : ${pUbuntuCodname}"
 echo "pPhpVersion          : ${pPhpVersion}"
 echo "pNodeVersion         : ${pNodeVersion}"
@@ -131,6 +134,7 @@ then
 #!/bin/bash
 pSailProject=\"${pSailProject}\"
 pSailSubproject=\"${pSailSubproject}\"
+pSailUserName=\"${pSailUserName}\"
 pUbuntuCodname=\"${pUbuntuCodname}\"
 pPhpVersion=\"${pPhpVersion}\"
 pNodeVersion=\"${pNodeVersion}\"
@@ -165,6 +169,7 @@ fi
 WS_TEMPLATE_FILE_VARS="\
 SAIL_PROJECT=${pSailProject}
 SAIL_SUBPROJECT=${pSailSubproject}
+SAIL_USERNAME=${pSailUserName}
 UBUNTU_CODENAME=${pUbuntuCodname}
 PHP_VERSION=${pPhpVersion}
 NODE_VERSION=${pNodeVersion}
@@ -232,7 +237,7 @@ then
   #-- storage-build
   echo ""
   echo "storabe-build"
-  sailAppExecAsRoot support/storage-build.sh --owner sail
+  sailAppExecAsRoot support/storage-build.sh --owner ${pSailUserName}
 
   #-- npm
   if [ -f "package.json" ] && [ ! -d "node_modules" ]
