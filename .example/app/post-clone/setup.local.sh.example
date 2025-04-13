@@ -23,7 +23,7 @@ pclLoadDefaultAndSavedParams
 
 echo ""
 
-[ -n "${pSailProject}" ] || envVarRead "Sail project" "pSailProject" "default:${default_pSailProject}|required|lower-case" ""
+[ -n "${pSailProject}" ] || envVarRead "Sail project" "pSailProject" "default:$(wsCoalesce "${default_pSailProject}" "$(basename "$(realpath "${BASE_DIR}")")")|required|lower-case" ""
 if [ -z "${pSailSubproject}" ]
 then
   defSailSubproject="$(basename "$(realpath "${BASE_DIR}")")"
@@ -31,9 +31,9 @@ then
   envVarRead "Sail subproject" "pSailSubproject" "default:$(wsCoalesce "${default_pSailSubproject}" "${defSailSubproject}")|required|lower-case" ""
 fi
 
-[ -n "${pUbuntuCodname}" ] || envVarRead "Ubuntu codename" "pUbuntuCodname" "default:$(wsCoalesce "${default_pUbuntuCodname}" "jammy")|required|lower-case" ""
-[ -n "${pPhpVersion}" ] || envVarRead "PHP version" "pPhpVersion" "default:$(wsCoalesce "${default_pPhpVersion}" "8.2")|required" ""
-[ -n "${pNodeVersion}" ] || envVarRead "Node version" "pNodeVersion" "default:$(wsCoalesce "${default_pNodeVersion}" "20")|required" ""
+[ -n "${pUbuntuCodname}" ] || envVarRead "Ubuntu codename" "pUbuntuCodname" "default:$(wsCoalesce "${default_pUbuntuCodname}" "noble")|required|lower-case" ""
+[ -n "${pPhpVersion}" ] || envVarRead "PHP version" "pPhpVersion" "default:$(wsCoalesce "${default_pPhpVersion}" "8.4")|required" ""
+[ -n "${pNodeVersion}" ] || envVarRead "Node version" "pNodeVersion" "default:$(wsCoalesce "${default_pNodeVersion}" "22")|required" ""
 
 [ -n "${pAppPort}" ] || envVarRead "APP port" "pAppPort" "default:$(wsCoalesce "${default_pAppPort}" "7001")|required" ""
 [ -n "${pEnableAsync}" ] || envVarRead "Enable async jobs app" "pEnableAsync" "default:$(wsCoalesce "${default_pEnableAsync}" "yes")|required|lower-case|hide-values" "y|yes|n|no"
