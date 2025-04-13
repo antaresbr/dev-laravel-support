@@ -27,8 +27,8 @@ Use: $(basename $0) <options> <project>
 
 options:
    --environment <name>       Environment name
-   --workspace-php <name>     Script para acesso ao PHP no workspace; Ex.: workpace-php-82
-   --owner <owner>            Storage's user owner; Deault sail
+   --workspace-php <name>     Script para acesso ao PHP no workspace; Ex.: workspace-php-84
+   --owner <owner>            Storage's user owner; Default user of <workspace-php>
    --www-group <group>        Group of WWW server; Default: www-data
    --laravel-installer <bin>  Laravel installer inside workspace-php; Default: /home/<owner>/.config/composer/vendor/bin/laravel
    --help                     Show this help
@@ -65,7 +65,7 @@ do
        exit 0;
     ;;
     *)
-      if [ -z "${pProject}" ]
+      if [ -z "${pProject}" ] && [ "${1:0:2}" != "--" ]
       then
         pProject="$1"
       else
@@ -80,7 +80,14 @@ done
 [ -n "${pEnvironment}" ] || lbError "Parameter not supplied: environment"
 [ -n "${pWorkspacePhp}" ] || lbError "Parameter not supplied: workspace-php"
 
-[ -n "${pOwner}" ] || pOwner="sail"
+if [ -z "${pOwner}" ]
+then
+  pOwner=$("${pWorkspacePhp}" exec whoami)
+  [ $? -eq 0 ] || lbError "fail to execute '"${pWorkspacePhp}" exec whoami'"
+  pOwner=$(echo "${pOwner}" | tr -d '\r')
+fi
+[ -n "${pOwner}" ] || lbError "Parameter not supplied: owner"
+
 [ -n "${pWwwGroup}" ] || pWwwGroup="www-data"
 [ -n "${pLaravelInstaller}" ] || pLaravelInstaller="/home/${pOwner}/.config/composer/vendor/bin/laravel"
 
@@ -89,6 +96,15 @@ GIT_BIN="$(which git)"
 
 "${pWorkspacePhp}" exec php --version &> /dev/null
 [ $? -eq 0 ] || lbError "Fail to call '${pWorkspacePhp} exec php'"
+
+"${pWorkspacePhp}" exec test -f "${pLaravelInstaller}" &> /dev/null
+if [ $? -ne 0 ]
+then
+  "${pWorkspacePhp}" exec test -f "/home/${pOwner}/bin/init-composer" &> /dev/null
+  [ $? -eq 0 ] && "${pWorkspacePhp}" exec "/home/${pOwner}/bin/init-composer"
+fi
+"${pWorkspacePhp}" exec test -f "${pLaravelInstaller}" &> /dev/null
+[ $? -eq 0 ] || lbError "${pWorkspacePhp} | File not found: ${pLaravelInstaller}"
 
 if [ -d "${pProject}" ]
 then

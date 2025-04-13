@@ -46,6 +46,13 @@ function validate() {
 
     [ -z "${PHP_VERSION}" ] && logError "Variable PHP_VERSION not defined"
 
+    [ -z "${WWW_GROUPNAME}" ] && logError "Variable WWWL_GROUPNAME not defined"
+    [ -z "${WWW_USERNAME}" ] && logError "Variable WWWL_USERNAME not defined"
+
+    [ -z "${SAIL_GROUPID}" ] && logError "Variable SAIL_GROUPID not defined"
+    [ -z "${SAIL_USERID}" ] && logError "Variable SAIL_USERID not defined"
+    [ -z "${SAIL_USERNAME}" ] && logError "Variable SAIL_USERNAME not defined"
+
     if [ "${SERVER_MODE}" == "async" ]
     then
         [ -n "${WORKER_CONNECTION}" ] || logError "Variable WORKER_CONNECTION not defined"
@@ -67,7 +74,7 @@ function validate() {
 function init() {
     logInfo "setup-container | init(): begin"
 
-    [ -z "${WWWUSER}" ] || usermod -u ${WWWUSER} sail
+    usermod -u ${SAIL_USERID} ${SAIL_USERNAME}
 
     [ -d /.composer ] || mkdir /.composer
     chmod -R ugo+rw /.composer
@@ -99,8 +106,8 @@ function init() {
             [ -z "${WORKER_RESP}" ] || addWorkerParam "--rest=${WORKER_RESP}"
         fi
 
-        [ -n "${ASYNC_USER}" ] || ASYNC_USER=www-data
-        [ -n "${ASYNC_GROUP}" ] || ASYNC_GROUP=www-data
+        [ -n "${ASYNC_USER}" ] || ASYNC_USER=${WWW_USERNAME}
+        [ -n "${ASYNC_GROUP}" ] || ASYNC_GROUP=${WWW_GROUPNAME}
         [ -n "${ASYNC_NUMPROCS}" ] || ASYNC_NUMPROCS=3
         [ -n "${ASYNC_STARTRETRIES}" ] || ASYNC_STARTRETRIES=5
 
@@ -121,20 +128,20 @@ function init() {
 function init_stack() {
     logInfo "setup-container | init_stack(): begin"
 
-    sudo --user=sail ln -s ${SHARE_APP_ENV} ${APP_HOME}/env
-    sudo --user=sail ln -s ${SHARE_APP_STORAGE} ${APP_HOME}/storage
+    sudo --user=${SAIL_USERNAME} ln -s ${SHARE_APP_ENV} ${APP_HOME}/env
+    sudo --user=${SAIL_USERNAME} ln -s ${SHARE_APP_STORAGE} ${APP_HOME}/storage
 
     local target=legacy/tcpdf/cache
     [ -d "${APP_HOME}/${target}" ] && rm -rf ${APP_HOME}/${target}
-    [ ! -d "${APP_HOME}/storage/${target}" ] && sudo --user sail --group www-data mkdir -p ${APP_HOME}/storage/${target}
-    sudo --user sail --group www-data ln -s ../../storage/${target} ${APP_HOME}/${target}
+    [ ! -d "${APP_HOME}/storage/${target}" ] && sudo --user=${SAIL_USERNAME} --group=${WWW_GROUPNAME} mkdir -p ${APP_HOME}/storage/${target}
+    sudo --user=${SAIL_USERNAME} --group=${WWW_GROUPNAME} ln -s ../../storage/${target} ${APP_HOME}/${target}
 
     local target=legacy/tcpdf/temp
     [ -d "${APP_HOME}/${target}" ] && rm -rf ${APP_HOME}/${target}
-    [ ! -d "${APP_HOME}/storage/${target}" ] && sudo --user sail --group www-data mkdir -p ${APP_HOME}/storage/${target}
-    sudo --user sail --group www-data ln -s ../../storage/${target} ${APP_HOME}/${target}
+    [ ! -d "${APP_HOME}/storage/${target}" ] && sudo --user=${SAIL_USERNAME} --group=${WWW_GROUPNAME} mkdir -p ${APP_HOME}/storage/${target}
+    sudo --user=${SAIL_USERNAME} --group=${WWW_GROUPNAME} ln -s ../../storage/${target} ${APP_HOME}/${target}
 
-    sudo --user sail --group www-data echo "{ \"ENVIRONMENT\": \"${ENVIRONMENT}\" }" > ${APP_HOME}/ENVIRONMENT.json
+    sudo --user=${SAIL_USERNAME} --group=${WWW_GROUPNAME} echo "{ \"ENVIRONMENT\": \"${ENVIRONMENT}\" }" > ${APP_HOME}/ENVIRONMENT.json
 
     logInfo "setup-container | init_stack(): end"
 }

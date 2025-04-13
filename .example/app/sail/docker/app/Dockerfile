@@ -5,8 +5,10 @@ FROM ubuntu:${UBUNTU_CODENAME}
 ARG UBUNTU_CODENAME
 ARG PHP_VERSION=none
 ARG NODE_VERSION=none
-ARG WWWUSER
-ARG WWWGROUP
+ARG SAIL_GROUPID
+ARG SAIL_USERID
+ARG SAIL_USERNAME
+ARG SAIL_USERPASS
 
 WORKDIR /var/www/html
 
@@ -14,7 +16,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TZ=UTC
 ENV PHP_VERSION=${PHP_VERSION}
 
-LABEL devcontainer.metadata="[{ \"remoteUser\": \"${WWWUSER}\" }]"
+LABEL devcontainer.metadata="[{ \"remoteUser\": \"${SAIL_USERID}\" }]"
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
@@ -53,12 +55,15 @@ RUN apt-get update \
 RUN update-alternatives --set php /usr/bin/php${PHP_VERSION}
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php${PHP_VERSION}
 
-#-- senha: sail
-RUN groupadd --force -g $WWWGROUP sail
-RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $WWWUSER sail \
-    && usermod -aG sudo sail \
-    && usermod --password '$6$g/d4Kgna99v5RyE.$I/Pz3TgvRKBQIn7G2EozzPbhjVHj4GvHPryp5gyRkTUN7/u2piwiDZxc/JCBW63/0CnZtSBezhWgrNFqUATkP1' sail
+#-- sail
+RUN getent group ${SAIL_GROUPID} > /dev/null || groupadd --force --gid ${SAIL_GROUPID} ${SAIL_USERNAME}
+RUN getent passwd ${SAIL_USERID} > /dev/null || useradd --create-home --shell /bin/bash --uid ${SAIL_USERID} --gid ${SAIL_GROUPID} ${SAIL_USERNAME}
+RUN usermod -aG sudo ${SAIL_USERNAME} \
+    && mkdir -p /home/${SAIL_USERNAME}/bin \
+    && chown -R ${SAIL_USERID}:${SAIL_GROUPID} /home/${SAIL_USERNAME}
+RUN [ -z "${SAIL_USERPASS}" ] || usermod --password "${SAIL_USERPASS}" ${SAIL_USERNAME}
 
+#-- configs
 COPY php.ini /etc/php/${PHP_VERSION}/cli/conf.d/99-sail.ini
 COPY resources/setup-container.sh /usr/local/bin/
 COPY resources/start-container.sh /usr/local/bin/
@@ -73,7 +78,7 @@ RUN chmod +x /usr/local/bin/start-container.sh \
 #-- probe
 RUN mkdir -p /var/www/probe
 COPY probe.index.php /var/www/probe/index.php
-RUN chown -R sail:sail /var/www/probe
+RUN chown -R ${SAIL_USERNAME}:${WWWUSERGROUP} /var/www/probe
 
 EXPOSE 80
 EXPOSE 81

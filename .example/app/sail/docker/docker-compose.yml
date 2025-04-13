@@ -8,8 +8,10 @@ services:
                 UBUNTU_CODENAME: ${UBUNTU_CODENAME}
                 PHP_VERSION: ${PHP_VERSION}
                 NODE_VERSION: ${NODE_VERSION}
-                WWWUSER: '${WWWUSER}'
-                WWWGROUP: '${WWWGROUP}'
+                SAIL_GROUPID: '${SAIL_GROUPID}'
+                SAIL_USERID: '${SAIL_USERID}'
+                SAIL_USERNAME: '${SAIL_USERNAME}'
+                SAIL_USERPASS: '${SAIL_USERPASS}'
         image: ${COMPOSE_PROJECT_NAME}/app
         container_name: ${SAIL_SERVICE_APP}
         extra_hosts:
@@ -22,8 +24,9 @@ services:
             SERVER_ENVIRONMENT: ${SERVER_ENVIRONMENT}
             SERVER_MODE: app
             SERVER_LABEL: ${SAIL_PROJECT}-${SAIL_SUBPROJECT}/app
-            WWWUSER: ${WWWUSER}
-            WWWGROUP: ${WWWGROUP}
+            SAIL_GROUPID: ${SAIL_GROUPID}
+            SAIL_USERID: ${SAIL_USERID}
+            SAIL_USERNAME: ${SAIL_USERNAME}
             LARAVEL_SAIL: 1
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'

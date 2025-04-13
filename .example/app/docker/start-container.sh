@@ -4,7 +4,7 @@ source /usr/local/bin/setup-container.sh || exit 1
 
 if [ $# -gt 0 ]
 then
-    exec gosu ${WWWUSER} "$@"
+    exec gosu ${SAIL_USERID} "$@"
 else
     if [ "${SERVER_MODE}" == "app" ]
     then

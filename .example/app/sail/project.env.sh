@@ -36,8 +36,11 @@ then
     [ -z "${MAILPIT_FORWARD_PORT}" ] && sailError "MAILPIT_FORWARD_PORT not defined"
 fi
 
-[ -z "${WWWUSER}" ] && WWWUSER=$(id -u)
-[ -z "${WWWGROUP}" ] && WWWGROUP=$(id -g)
+[ -z "${SAIL_GROUPID}" ] && SAIL_GROUPID=$(id -g)
+[ -z "${SAIL_USERID}" ] && SAIL_USERID=$(id -u)
+[ -z "${SAIL_USERNAME}" ] && SAIL_USERNAME="sail"
+# default user password: sail
+[ -z "${SAIL_USERPASS}" ] && SAIL_USERPASS='$6$g/d4Kgna99v5RyE.$I/Pz3TgvRKBQIn7G2EozzPbhjVHj4GvHPryp5gyRkTUN7/u2piwiDZxc/JCBW63/0CnZtSBezhWgrNFqUATkP1'
 
 [ -z "${SAIL_SERVICE_ASYNC_CONNECTION}" ] && SAIL_SERVICE_ASYNC_CONNECTION="redis"
 [ -z "${SAIL_SERVICE_ASYNC_QUEUE}" ] && SAIL_SERVICE_ASYNC_QUEUE=""
@@ -62,8 +65,10 @@ export PGSQL_FORWARD_PORT
 
 export MAILPIT_FORWARD_PORT
 
-export WWWUSER
-export WWWGROUP
+export SAIL_GROUPID
+export SAIL_USERID
+export SAIL_USERNAME
+export SAIL_USERPASS
 
 export SAIL_SERVICE_APP="${COMPOSE_PROJECT_NAME}-app"
 export SAIL_SERVICE_APP_USER="sail"
