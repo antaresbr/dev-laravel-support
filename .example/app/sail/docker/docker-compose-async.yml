@@ -11,6 +11,8 @@ services:
             SERVER_ENVIRONMENT: ${SERVER_ENVIRONMENT}
             SERVER_MODE: async
             SERVER_LABEL: ${SAIL_PROJECT}-${SAIL_SUBPROJECT}/async
+            WWW_USERNAME: ${WWW_USERNAME}
+            WWW_GROUPNAME: ${WWW_GROUPNAME}
             SAIL_GROUPID: ${SAIL_GROUPID}
             SAIL_USERID: ${SAIL_USERID}
             SAIL_USERNAME: ${SAIL_USERNAME}

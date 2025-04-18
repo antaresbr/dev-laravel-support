@@ -8,6 +8,8 @@ services:
                 UBUNTU_CODENAME: ${UBUNTU_CODENAME}
                 PHP_VERSION: ${PHP_VERSION}
                 NODE_VERSION: ${NODE_VERSION}
+                WWW_USERNAME: ${WWW_USERNAME}
+                WWW_GROUPNAME: ${WWW_GROUPNAME}
                 SAIL_GROUPID: '${SAIL_GROUPID}'
                 SAIL_USERID: '${SAIL_USERID}'
                 SAIL_USERNAME: '${SAIL_USERNAME}'
@@ -24,6 +26,8 @@ services:
             SERVER_ENVIRONMENT: ${SERVER_ENVIRONMENT}
             SERVER_MODE: app
             SERVER_LABEL: ${SAIL_PROJECT}-${SAIL_SUBPROJECT}/app
+            WWW_USERNAME: ${WWW_USERNAME}
+            WWW_GROUPNAME: ${WWW_GROUPNAME}
             SAIL_GROUPID: ${SAIL_GROUPID}
             SAIL_USERID: ${SAIL_USERID}
             SAIL_USERNAME: ${SAIL_USERNAME}

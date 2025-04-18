@@ -32,6 +32,8 @@ then
 fi
 
 [ -n "${pSailUserName}" ] || envVarRead "'sail' username" "pSailUserName" "default:$(wsCoalesce "${default_pSailUserName}" "ubuntu")|required|lower-case" ""
+[ -n "${pWwwUserName}" ] || envVarRead "'www' username" "pWwwUserName" "default:$(wsCoalesce "${default_pWwwUserName}" "www-data")|required|lower-case" ""
+[ -n "${pWwwGroupName}" ] || envVarRead "'www' groupname" "pWwwGroupName" "default:$(wsCoalesce "${default_pWwwGroupName}" "www-data")|required|lower-case" ""
 
 [ -n "${pUbuntuCodname}" ] || envVarRead "Ubuntu codename" "pUbuntuCodname" "default:$(wsCoalesce "${default_pUbuntuCodname}" "noble")|required|lower-case" ""
 [ -n "${pPhpVersion}" ] || envVarRead "PHP version" "pPhpVersion" "default:$(wsCoalesce "${default_pPhpVersion}" "8.4")|required" ""
@@ -84,6 +86,8 @@ echo ""
 echo "pSailProject         : ${pSailProject}"
 echo "pSailSubproject      : ${pSailSubproject}"
 echo "pSailUserName        : ${pSailUserName}"
+echo "pWwwUserName         : ${pWwwUserName}"
+echo "pWwwGroupName        : ${pWwwGroupName}"
 echo "pUbuntuCodname       : ${pUbuntuCodname}"
 echo "pPhpVersion          : ${pPhpVersion}"
 echo "pNodeVersion         : ${pNodeVersion}"
@@ -135,6 +139,8 @@ then
 pSailProject=\"${pSailProject}\"
 pSailSubproject=\"${pSailSubproject}\"
 pSailUserName=\"${pSailUserName}\"
+pWwwUserName=\"${pWwwUserName}\"
+pWwwGroupName=\"${pWwwGroupName}\"
 pUbuntuCodname=\"${pUbuntuCodname}\"
 pPhpVersion=\"${pPhpVersion}\"
 pNodeVersion=\"${pNodeVersion}\"
@@ -170,6 +176,8 @@ WS_TEMPLATE_FILE_VARS="\
 SAIL_PROJECT=${pSailProject}
 SAIL_SUBPROJECT=${pSailSubproject}
 SAIL_USERNAME=${pSailUserName}
+WWW_USERNAME=${pWwwUserName}
+WWW_GROUPNAME=${pWwwGroupName}
 UBUNTU_CODENAME=${pUbuntuCodname}
 PHP_VERSION=${pPhpVersion}
 NODE_VERSION=${pNodeVersion}
@@ -237,7 +245,7 @@ then
   #-- storage-build
   echo ""
   echo "storabe-build"
-  sailAppExecAsRoot support/storage-build.sh --owner ${pSailUserName}
+  sailAppExecAsRoot support/storage-build.sh --owner ${pSailUserName} --www-group ${pWwwGroupName}
 
   #-- npm
   if [ -f "package.json" ] && [ ! -d "node_modules" ]

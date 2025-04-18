@@ -46,8 +46,8 @@ function validate() {
 
     [ -z "${PHP_VERSION}" ] && logError "Variable PHP_VERSION not defined"
 
-    [ -z "${WWW_GROUPNAME}" ] && logError "Variable WWWL_GROUPNAME not defined"
-    [ -z "${WWW_USERNAME}" ] && logError "Variable WWWL_USERNAME not defined"
+    [ -z "${WWW_GROUPNAME}" ] && logError "Variable WWW_GROUPNAME not defined"
+    [ -z "${WWW_USERNAME}" ] && logError "Variable WWW_USERNAME not defined"
 
     [ -z "${SAIL_GROUPID}" ] && logError "Variable SAIL_GROUPID not defined"
     [ -z "${SAIL_USERID}" ] && logError "Variable SAIL_USERID not defined"
