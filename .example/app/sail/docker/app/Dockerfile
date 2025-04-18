@@ -80,7 +80,7 @@ RUN chmod +x /usr/local/bin/start-container.sh \
 #-- probe
 RUN mkdir -p /var/www/probe
 COPY probe.index.php /var/www/probe/index.php
-RUN chown -R ${SAIL_USERNAME}:${WWWUSERGROUP} /var/www/probe
+RUN chown -R ${SAIL_USERNAME}:${WWW_GROUPNAME} /var/www/probe
 
 EXPOSE 80
 EXPOSE 81
