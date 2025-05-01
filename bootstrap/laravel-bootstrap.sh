@@ -12,7 +12,7 @@ function lbWarn() {
   echo -e "\n${msgPrefix} | WARN | $@\n"
 }
 
-BASE_DIR="$(realpath "$(dirname "$0")")"
+BASE_DIR="$(realpath "$(pwd)")"
 
 #-- init parameters
 pProject=""
@@ -21,6 +21,7 @@ pWorkspacePhp=""
 pOwner=""
 pWwwGroup=""
 pLaravelInstaller=""
+pBranchName=""
 #-- help message
 msgHelp="
 Use: $(basename $0) <options> <project>
@@ -31,13 +32,14 @@ options:
    --owner <owner>            Storage's user owner; Default user of <workspace-php>
    --www-group <group>        Group of WWW server; Default: www-data
    --laravel-installer <bin>  Laravel installer inside workspace-php; Default: /home/<owner>/.config/composer/vendor/bin/laravel
+   --git-branch <branch>      GIT new branch name; Default: master
    --help                     Show this help
 "
 #-- get parameters
 while [ $# -gt 0 ]
 do
   case "$1" in
-    "--environment" | "--workspace-php" | "--owner" | "--www-group" | "--laravel-installer" )
+    "--environment" | "--workspace-php" | "--owner" | "--www-group" | "--laravel-installer" | "--branch-name" )
       zp="$1"
       shift 1
       [ $# -lt 1 ] && lbError "Parameter: ${zp}, value not supplied"
@@ -57,6 +59,9 @@ do
         ;;
         "--laravel-installer")
           pLaravelInstaller="$1"
+        ;;
+        "--branch-name")
+          pBranchName="$1"
         ;;
       esac
     ;;
@@ -90,6 +95,7 @@ fi
 
 [ -n "${pWwwGroup}" ] || pWwwGroup="www-data"
 [ -n "${pLaravelInstaller}" ] || pLaravelInstaller="/home/${pOwner}/.config/composer/vendor/bin/laravel"
+[ -n "${pBranchName}" ] || pBranchName="master"
 
 GIT_BIN="$(which git)"
 [ -n "${GIT_BIN}" ] || lbError "GIT binary not found"
@@ -115,6 +121,14 @@ else
   echo "creating in [ ${projectHome} ]"
   "${pWorkspacePhp}" exec ${pLaravelInstaller} new "${projectHome}"
   [ $? -eq 0 ] || lbError "Fail to create project '${pProject}'"
+
+  cd "${pProject}"
+  [ $? -eq 0 ] || lbError "Fail to access '${pProject}'"
+  git init -b master
+  [ $? -eq 0 ] || lbError "Fail to initialize git repository '${pProject}'"
+  git add . && git commit -m 'Initial commit'
+  [ $? -eq 0 ] || lbError "Fail to commit git repository '${pProject}'"
+  cd - > /dev/null
 fi
 
 _target="${pProject}/composer.json"
