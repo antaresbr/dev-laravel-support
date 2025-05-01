@@ -200,6 +200,19 @@ SAIL_MAILPIT=${pEnableMailpit}
 MAILPIT_FORWARD_PORT=${pMailpitForwardPort:-$defMailpitForwardPort}
 "
 
+#-- update .gitignore
+if ! cat .gitignore | grep '#-- custom bootstrap' &> /dev/null
+then
+  echo "" >> .gitignore
+  echo "#-- custom bootstrap" >> .gitignore
+fi
+cat .gitignore | grep '/.workspace-lib/' &> /dev/null || echo "/.workspace-lib/" >> .gitignore
+cat .gitignore | grep '/BUILD-INFO.json' &> /dev/null || echo "/BUILD-INFO.json" >> .gitignore
+cat .gitignore | grep '/ENVIRONMENT.json' &> /dev/null || echo "/ENVIRONMENT.json" >> .gitignore
+cat .gitignore | grep '/git-repo' &> /dev/null || echo "/git-repo" >> .gitignore
+cat .gitignore | grep '/package-lock.json' &> /dev/null || echo "/package-lock.json" >> .gitignore
+cat .gitignore | grep '/support/' &> /dev/null || echo "/support/" >> .gitignore
+
 #-- sail
 
 sailSetup
