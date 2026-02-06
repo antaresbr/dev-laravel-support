@@ -70,6 +70,20 @@ function pgsql_abort_if_exists_in_production() {
 }
 
 
+function pgsql_abort_if_not_exists() {
+  pgsql_root_credentials
+
+  local exists="$($(pgsql_cmd) --command="SELECT datname FROM pg_database WHERE datname = '${SUPP_DB_DATABASE}';" | grep -i "${SUPP_DB_DATABASE}")"
+  [ $? -ne 0 ] && supError "Fail to check existence: ${SUPP_DB_DATABASE}"
+  if [ -z "${exists}" ]
+  then
+    supError "Database does not exists: ${SUPP_DB_DATABASE}"
+  fi
+
+  pgsql_unset_credentials
+}
+
+
 function pgsql_init_db() {
   echo "creating database: ${SUPP_DB_DATABASE}@${SUPP_DB_HOST}"
 
@@ -132,6 +146,51 @@ function pgsql_dump_to_file() {
   sed -i "s/\`dbadmin\`/\`{{@DB_USER@}}\`/g" "${pFile}"
   sed -i "s/\`root\`/\`{{@DB_USER@}}\`/g" "${pFile}"
   _ec=$?; [ $_ec -eq 0 ] || return $_ec
+}
+
+
+function pgsql_cleanup_triggers() {
+  echo ""
+  echo "::[ cleanup triggers ]::"
+  echo ""
+  echo "! not implemented yet"
+  echo ""
+}
+
+
+function pgsql_cleanup_views() {
+  echo ""
+  echo "::[ cleanup views ]::"
+  echo ""
+  echo "! not implemented yet"
+  echo ""
+}
+
+
+function pgsql_cleanup_foreign_keys() {
+  echo ""
+  echo "::[ cleanup foreign keys ]::"
+  echo ""
+  echo "! not implemented yet"
+  echo ""
+}
+
+
+function pgsql_cleanup_auto_increment() {
+  echo ""
+  echo "::[ cleanup auto increment ]::"
+  echo ""
+  echo "! not implemented yet"
+  echo ""
+}
+
+
+function pgsql_cleanup_primary_keys() {
+  echo ""
+  echo "::[ cleanup primary keys ]::"
+  echo ""
+  echo "! not implemented yet"
+  echo ""
 }
 
 fi

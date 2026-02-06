@@ -70,6 +70,20 @@ function mysql_abort_if_exists_in_production() {
 }
 
 
+function mysql_abort_if_not_exists() {
+  mysql_root_credentials
+
+  local exists="$($(mysql_cmd) --skip-column-names --execute="SHOW DATABASES LIKE '${SUPP_DB_DATABASE}';" | grep -i "${SUPP_DB_DATABASE}")"
+  [ $? -ne 0 ] && supError "Fail to check existence: ${SUPP_DB_DATABASE}"
+  if [ -z "${exists}" ]
+  then
+    supError "Database does not exists: ${SUPP_DB_DATABASE}"
+  fi
+
+  mysql_unset_credentials
+}
+
+
 function mysql_init_db() {
   echo "creating database: ${SUPP_DB_DATABASE}@${SUPP_DB_HOST}"
 
@@ -124,6 +138,218 @@ function mysql_dump_to_file() {
   sed -i "s/\`dbadmin\`/\`{{@DB_USER@}}\`/g" "${pFile}"
   sed -i "s/\`root\`/\`{{@DB_USER@}}\`/g" "${pFile}"
   _ec=$?; [ $_ec -eq 0 ] || return $_ec
+}
+
+
+function mysql_cleanup_triggers() {
+  echo ""
+  echo "::[ cleanup triggers ]::"
+
+  [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ] || supError "Database is production, ignored"
+
+  mysql_root_credentials
+
+  local sqlFile="$(mktemp)"
+  [ $? -eq 0 ] || supError "Fail to create temp file"
+  echo "
+SELECT
+  TRIGGER_SCHEMA, TRIGGER_NAME
+FROM
+  INFORMATION_SCHEMA.TRIGGERS
+WHERE
+  TRIGGER_SCHEMA = '${SUPP_DB_DATABASE}'
+;
+" > "${sqlFile}"
+  [ $? -eq 0 ] || supError "Fail to write to temp file: ${sqlFile}"
+
+  local _rs=$(mysql_exec_file "${sqlFile}" --silent --skip-column-names)
+  [ $? -eq 0 ] || supError "Fail to execute sql file: ${sqlFile}"
+
+  if [ -n "${_rs}" ]
+  then
+    echo "${_rs}" | while read -r schema trigger
+    do
+      echo "   > ${schema}.${trigger};"
+      $(mysql_cmd) --execute="DROP TRIGGER IF EXISTS ${schema}.${trigger};"
+      [ $? -eq 0 ] || echo "     ! fail to drop"
+    done
+  fi
+
+  [ ! -f "${sqlFile}" ] || rm -f "${sqlFile}"
+
+  mysql_unset_credentials
+}
+
+
+function mysql_cleanup_views() {
+  echo ""
+  echo "::[ cleanup views ]::"
+
+  [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ] || supError "Database is production, ignored"
+
+  mysql_root_credentials
+
+  local sqlFile="$(mktemp)"
+  [ $? -eq 0 ] || supError "Fail to create temp file"
+  echo "
+SELECT
+    TABLE_SCHEMA, TABLE_NAME
+FROM
+    INFORMATION_SCHEMA.TABLES
+WHERE
+    TABLE_SCHEMA = '${SUPP_DB_DATABASE}'
+    AND TABLE_TYPE = 'VIEW'
+;
+" > "${sqlFile}"
+  [ $? -eq 0 ] || supError "Fail to write to temp file: ${sqlFile}"
+
+  local _rs=$(mysql_exec_file "${sqlFile}" --silent --skip-column-names)
+  [ $? -eq 0 ] || supError "Fail to execute sql file: ${sqlFile}"
+
+  if [ -n "${_rs}" ]
+  then
+    echo "${_rs}" | while read -r schema table
+    do
+      echo "   > ${schema}.${table};"
+      $(mysql_cmd) --execute="DROP VIEW IF EXISTS ${schema}.${table};"
+      [ $? -eq 0 ] || echo "     ! fail to drop"
+    done
+  fi
+
+  [ ! -f "${sqlFile}" ] || rm -f "${sqlFile}"
+
+  mysql_unset_credentials
+}
+
+
+function mysql_cleanup_foreign_keys() {
+  echo ""
+  echo "::[ cleanup foreign keys ]::"
+
+  [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ] || supError "Database is production, ignored"
+
+  mysql_root_credentials
+
+  local sqlFile="$(mktemp)"
+  [ $? -eq 0 ] || supError "Fail to create temp file"
+  echo "
+SELECT
+    TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME
+FROM
+    INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+WHERE
+    TABLE_SCHEMA = '${SUPP_DB_DATABASE}'
+    AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+;
+" > "${sqlFile}"
+  [ $? -eq 0 ] || supError "Fail to write to temp file: ${sqlFile}"
+
+  local _rs=$(mysql_exec_file "${sqlFile}" --silent --skip-column-names)
+  [ $? -eq 0 ] || supError "Fail to execute sql file: ${sqlFile}"
+
+  if [ -n "${_rs}" ]
+  then
+    echo "${_rs}" | while read -r schema table constraint
+    do
+      echo "   > ${schema}.${table}.${constraint};"
+      $(mysql_cmd) --execute="ALTER TABLE ${schema}.${table} DROP FOREIGN KEY ${constraint};"
+      [ $? -eq 0 ] || echo "     ! fail to drop"
+    done
+  fi
+
+  [ ! -f "${sqlFile}" ] || rm -f "${sqlFile}"
+
+  mysql_unset_credentials
+}
+
+
+function mysql_cleanup_auto_increment() {
+  echo ""
+  echo "::[ cleanup auto increment ]::"
+
+  [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ] || supError "Database is production, ignored"
+
+  mysql_root_credentials
+
+  local sqlFile="$(mktemp)"
+  [ $? -eq 0 ] || supError "Fail to create temp file"
+  echo "
+SELECT 
+    TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE
+FROM 
+    information_schema.COLUMNS 
+WHERE 
+    TABLE_SCHEMA = '${SUPP_DB_DATABASE}'
+    AND EXTRA = 'auto_increment'
+;
+" > "${sqlFile}"
+  [ $? -eq 0 ] || supError "Fail to write to temp file: ${sqlFile}"
+
+  local _rs=$(mysql_exec_file "${sqlFile}" --silent --skip-column-names)
+  [ $? -eq 0 ] || supError "Fail to execute sql file: ${sqlFile}"
+
+  if [ -n "${_rs}" ]
+  then
+    echo "${_rs}" | while IFS=$'\t' read -r schema table column_name column_type is_nullable
+    do
+      echo "   > ${schema}.${table}.${column_name};"
+
+      if [ "${is_nullable}" == "NO" -o "${is_nullable}" == "NOT NULL" ]
+      then
+        is_nullable="NOT NULL"
+      else
+        is_nullable=""
+      fi
+
+      $(mysql_cmd) --execute="ALTER TABLE ${schema}.${table} MODIFY COLUMN ${column_name} ${column_type} ${is_nullable};"
+      [ $? -eq 0 ] || echo "     ! fail to alter"
+    done
+  fi
+
+  [ ! -f "${sqlFile}" ] || rm -f "${sqlFile}"
+
+  mysql_unset_credentials
+}
+
+
+function mysql_cleanup_primary_keys() {
+  echo ""
+  echo "::[ cleanup primary keys ]::"
+
+  [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ] || supError "Database is production, ignored"
+
+  mysql_root_credentials
+
+  local sqlFile="$(mktemp)"
+  [ $? -eq 0 ] || supError "Fail to create temp file"
+  echo "
+SELECT
+    TABLE_SCHEMA, TABLE_NAME
+FROM
+    INFORMATION_SCHEMA.STATISTICS
+WHERE
+    TABLE_SCHEMA = '${SUPP_DB_DATABASE}'
+    AND INDEX_NAME = 'PRIMARY'
+;
+" > "${sqlFile}"
+  [ $? -eq 0 ] || supError "Fail to write to temp file: ${sqlFile}"
+
+  local _rs=$(mysql_exec_file "${sqlFile}" --silent --skip-column-names)
+  [ $? -eq 0 ] || supError "Fail to execute sql file: ${sqlFile}"
+
+  if [ -n "${_rs}" ]
+  then
+    echo "${_rs}" | while read -r schema table
+    do
+      echo "   > ${schema}.${table};"
+      $(mysql_cmd) --execute="ALTER TABLE ${schema}.${table} DROP PRIMARY KEY;"
+      [ $? -eq 0 ] || echo "     ! fail to drop"
+    done
+  fi
+
+  [ ! -f "${sqlFile}" ] || rm -f "${sqlFile}"
+
+  mysql_unset_credentials
 }
 
 fi
