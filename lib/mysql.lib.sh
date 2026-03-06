@@ -181,6 +181,49 @@ WHERE
 }
 
 
+function mysql_cleanup_routines() {
+  echo ""
+  echo "::[ cleanup routines ]::"
+
+  [ "${SERVER_ENVIRONMENT}" != "${PRODUCTION_ENVIRONMENT}" ] || supError "Database is production, ignored"
+
+  mysql_root_credentials
+
+  local sqlFile="$(mktemp)"
+  [ $? -eq 0 ] || supError "Fail to create temp file"
+  
+  echo "
+SELECT
+  ROUTINE_SCHEMA, ROUTINE_NAME, ROUTINE_TYPE
+FROM
+  INFORMATION_SCHEMA.ROUTINES
+WHERE
+  ROUTINE_SCHEMA = '${SUPP_DB_DATABASE}'
+  AND ROUTINE_TYPE in ('FUNCTION', 'PROCEDURE')
+;
+" > "${sqlFile}"
+  [ $? -eq 0 ] || supError "Fail to write to temp file: ${sqlFile}"
+
+  local _rs=$(mysql_exec_file "${sqlFile}" --silent --skip-column-names)
+  [ $? -eq 0 ] || supError "Fail to execute sql file: ${sqlFile}"
+
+  if [ -n "${_rs}" ]
+  then
+    echo "${_rs}" | while read -r schema function_name routine_type
+    do
+      echo "   > ${routine_type} : ${schema}.${function_name};"
+      # O comando correto para funções é DROP FUNCTION
+      $(mysql_cmd) --execute="DROP ${routine_type} IF EXISTS ${schema}.${function_name};"
+      [ $? -eq 0 ] || echo "     ! fail to drop"
+    done
+  fi
+
+  [ ! -f "${sqlFile}" ] || rm -f "${sqlFile}"
+
+  mysql_unset_credentials
+}
+
+
 function mysql_cleanup_views() {
   echo ""
   echo "::[ cleanup views ]::"

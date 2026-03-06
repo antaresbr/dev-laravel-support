@@ -62,6 +62,7 @@ ${SUPP_DB_DRIVER}_abort_if_exists_in_production
 [ $? -eq 0 ] || supError "Fail to check database existence: ${SUPP_DB_DATABASE}"
 
 ${SUPP_DB_DRIVER}_cleanup_triggers
+${SUPP_DB_DRIVER}_cleanup_routines
 ${SUPP_DB_DRIVER}_cleanup_views
 ${SUPP_DB_DRIVER}_cleanup_foreign_keys
 ${SUPP_DB_DRIVER}_cleanup_auto_increment

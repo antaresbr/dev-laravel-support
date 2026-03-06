@@ -158,6 +158,15 @@ function pgsql_cleanup_triggers() {
 }
 
 
+function pgsql_cleanup_routines() {
+  echo ""
+  echo "::[ cleanup routines ]::"
+  echo ""
+  echo "! not implemented yet"
+  echo ""
+}
+
+
 function pgsql_cleanup_views() {
   echo ""
   echo "::[ cleanup views ]::"
