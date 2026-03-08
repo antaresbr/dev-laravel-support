@@ -231,7 +231,7 @@ fi
 #-- build
 
 sailBuild
-$_ec=$?; [ $_ec -eq 0 ] || exit $_ec
+_ec=$?; { [ $_ec -eq 0 ] || exit $_ec; }; unset _ec
 
 #-- ambiente
 
