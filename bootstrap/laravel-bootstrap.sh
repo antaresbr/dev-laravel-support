@@ -27,12 +27,12 @@ msgHelp="
 Use: $(basename $0) <options> <project>
 
 options:
-   --environment <name>       Environment name
-   --workspace-php <name>     Script para acesso ao PHP no workspace; Ex.: workspace-php-84
+   --environment <name>       Environment name. Ex.: local, staging, production
+   --workspace-php <name>     Script para acesso ao PHP no workspace; Ex.: workspace-php-84.sh
    --owner <owner>            Storage's user owner; Default user of <workspace-php>
    --www-group <group>        Group of WWW server; Default: www-data
    --laravel-installer <bin>  Laravel installer inside workspace-php; Default: /home/<owner>/.config/composer/vendor/bin/laravel
-   --git-branch <branch>      GIT new branch name; Default: master
+   --git-branch <branch>      GIT new branch name; Default: main
    --help                     Show this help
 "
 #-- get parameters
@@ -95,7 +95,7 @@ fi
 
 [ -n "${pWwwGroup}" ] || pWwwGroup="www-data"
 [ -n "${pLaravelInstaller}" ] || pLaravelInstaller="/home/${pOwner}/.config/composer/vendor/bin/laravel"
-[ -n "${pBranchName}" ] || pBranchName="master"
+[ -n "${pBranchName}" ] || pBranchName="main"
 
 GIT_BIN="$(which git)"
 [ -n "${GIT_BIN}" ] || lbError "GIT binary not found"
@@ -124,7 +124,7 @@ else
 
   cd "${pProject}"
   [ $? -eq 0 ] || lbError "Fail to access '${pProject}'"
-  git init -b master
+  git init -b "${pBranchName}"
   [ $? -eq 0 ] || lbError "Fail to initialize git repository '${pProject}'"
   git add . && git commit -m 'Initial commit'
   [ $? -eq 0 ] || lbError "Fail to commit git repository '${pProject}'"
