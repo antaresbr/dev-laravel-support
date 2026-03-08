@@ -37,7 +37,7 @@ fi
 
 [ -n "${pUbuntuCodname}" ] || envVarRead "Ubuntu codename" "pUbuntuCodname" "default:$(wsCoalesce "${default_pUbuntuCodname}" "noble")|required|lower-case" ""
 [ -n "${pPhpVersion}" ] || envVarRead "PHP version" "pPhpVersion" "default:$(wsCoalesce "${default_pPhpVersion}" "8.4")|required" ""
-[ -n "${pNodeVersion}" ] || envVarRead "Node version" "pNodeVersion" "default:$(wsCoalesce "${default_pNodeVersion}" "22")|required" ""
+[ -n "${pNodeVersion}" ] || envVarRead "Node version" "pNodeVersion" "default:$(wsCoalesce "${default_pNodeVersion}" "24")|required" ""
 
 [ -n "${pAppPort}" ] || envVarRead "APP port" "pAppPort" "default:$(wsCoalesce "${default_pAppPort}" "7001")|required" ""
 [ -n "${pEnableAsync}" ] || envVarRead "Enable async jobs app" "pEnableAsync" "default:$(wsCoalesce "${default_pEnableAsync}" "yes")|required|lower-case|hide-values" "y|yes|n|no"
@@ -231,6 +231,7 @@ fi
 #-- build
 
 sailBuild
+$_ec=$?; [ $_ec -eq 0 ] || exit $_ec
 
 #-- ambiente
 
