@@ -157,8 +157,9 @@ PGSQL_ROOT_PASSWORD=${pPgsqlRootPassword}
 }
 
 
-function doLinksToBaseBaseScripts() {
+function doLinksToBaseScripts() {
   local target=""
+  target="base/scripts/db-cleanup.sh"         && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
   target="base/scripts/db-dump.sh"            && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
   target="base/scripts/db-exec-sql.sh"        && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
   target="base/scripts/db-init-dbdefault.sh"  && { [ -f "$(basename "${target}")" ] || ln -v -s "${target}"; }
@@ -232,7 +233,7 @@ if [ "${pConfirm:0:1}" != "y" ]
 then
   echo "  + skiped"
 else
-  doLinksToBaseBaseScripts
+  doLinksToBaseScripts
 fi
 
 echo ""
