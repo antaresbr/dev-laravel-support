@@ -10,7 +10,7 @@ source "${_bootstrap}" || { echo -e "\n${BASH_SOURCE[0]} | Fail to source file: 
 #-- init parameters
 pEnv=""
 pAffix=""
-pFile=""
+pFile=()
 pNoHeaderInfos=""
 #-- help message
 msgHelp="
@@ -42,9 +42,7 @@ do
           [ -z "${pAffix}" ] || SUPP_AFFIX="_${pAffix^^}"
         ;;
         "--file")
-          [ -n "${pFile}" ] && pFile="${pFile}"$'\n'
-          pFile="${pFile}$1"
-          echo ${pFile}
+          pFile+=("$1")
         ;;
       esac
     ;;
@@ -62,7 +60,7 @@ do
   [ $# -gt 0 ] && shift 1
 done
 
-[ -n "${pFile}" ] || supError "Parameter not supplied: file"
+[ ${#pFile[@]} -gt 0 ] || supError "Parameter not supplied: file"
 
 supLoadEnvsAndLibs
 [ $? -eq 0 ] || supError "Fail on supLoadEnvsAndLibs"
@@ -76,8 +74,7 @@ ${DB_DRIVER}_exec_file_prepare
 ${DB_DRIVER}_user_credentials
 [ $? -eq 0 ] || supError "Fail to set user credentials"
 
-IFS=$'\n'
-for file in ${pFile}
+for file in "${pFile[@]}"
 do
   echo ": ${file}"
 
@@ -97,4 +94,3 @@ do
 
   echo ""
 done
-IFS=
